@@ -104,12 +104,22 @@ class RiskPerception:
         return perceived_risk_df
 
     def split_data(self, perceived_risk_df, train_test_split_ratio):
-
         train_df, test_df = train_test_split(perceived_risk_df, train_size=train_test_split_ratio)
 
         return train_df, test_df
 
-    def train(self):
+    def train(self, train_df, test_df):
+        # Prediction Models for Categorical Label 
+        ## Model1. TF-IDF + RandomForest
+
+        ## Model2. Correlation Filtering + RandomForest 
+
+        ## Model3. Correlation Filtering + Two Topic Model
+
+        # Prediction Models for Numerical Label
+        ## Model4. TF-IDF + ElasticNet
+
+        ## Model5. Correlation Filtering + ElasticNet        
         pass
 
     def predict(self):
@@ -117,7 +127,7 @@ class RiskPerception:
 
     def run(self):
         raw_df = self.get_data()
-        
+
         perceived_risk_df = self.preprocessing(raw_df, self.user_type, self.label_type)
 
         train_df, test_df = self.split_data(perceived_risk_df, self.train_test_split_ratio)
