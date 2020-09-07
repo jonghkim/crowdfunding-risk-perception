@@ -78,23 +78,26 @@ class RiskPerception:
         return perceived_risk_df
 
     def label_generation(self, perceived_risk_df, label_type):
-
+        print("## Label Generation")
         label_generator = LabelGenerator()
         label = label_generator.get_label(perceived_risk_df['perceived_risk'].tolist(), label_type)
-
+        
         perceived_risk_df['label'] = label
 
         return perceived_risk_df
 
-    def preproceesing(self, raw_df, user_type):
+    def preprocessing(self, raw_df, user_type, label_type):
+        print("# Preprocessing")
         # Aggregate into Project-Level Data
         perceived_risk_df = self.get_project_level_perceived_risk(raw_df, user_type)
 
         # Get Label
-        perceived_risk_df = self.label_generation(perceived_risk_df, self.label_type)
+        perceived_risk_df = self.label_generation(perceived_risk_df, label_type)
 
         # Normalize Risk Description
         perceived_risk_df = self.normalizing_risk_description(perceived_risk_df)
+
+        print(perceived_risk_df.head())
 
         return perceived_risk_df
 
@@ -105,6 +108,9 @@ class RiskPerception:
         pass
 
     def run(self):
+        raw_df = self.get_data()
+        perceived_risk_df = self.preprocessing(raw_df, self.user_type, self.label_type)
+        
         pass
 
 if __name__ == '__main__':

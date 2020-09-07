@@ -1,7 +1,6 @@
-
 class LabelGenerator:
 
-    def get_label(self, label_type, perceived_risk):
+    def get_label(self, perceived_risk, label_type):
 
         if label_type == 'numerical':
             perceived_risk = [risk/float(5) for risk in perceived_risk]
@@ -11,8 +10,8 @@ class LabelGenerator:
             label = [1 if risk >3 else 0 for risk in perceived_risk]
 
             print("Categorical Label Classification Result")
-            print("Low Risk: ", (label==0).sum())
-            print("High Risk: ",(label==1).sum())
+            print("Low Risk: ", len(label)-sum(label))
+            print("High Risk: ", sum(label))
 
             return label
                     
@@ -20,10 +19,10 @@ class LabelGenerator:
             label =  [1 if risk >=3 else 0 for risk in perceived_risk]    
 
             print("Categorical Label Classification Result")
-            print("Low Risk: ", (label==0).sum())
-            print("High Risk: ",(label==1).sum())
+            print("Low Risk: ", len(label)-sum(label))
+            print("High Risk: ", sum(label))
 
             return label
 
         else:
-            return None
+            raise Exception('No Label Type is Matched')
