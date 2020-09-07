@@ -4,6 +4,7 @@ from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
 from models.vectorizer.vectorizer_correlation_filtering import VectorizerCorrelationFiltering
 
 import numpy as np
+import pandas as pd
 
 class RandomForest(BasePredictor):
     def __init__(self):
@@ -42,6 +43,13 @@ class RandomForest(BasePredictor):
 
             print("   Size of Positive Words: ", len(plus_word_list))
             print("   Size of Negative Words: ", len(minus_word_list))
+
+            risk_words_df = pd.DataFrame()
+
+            risk_words_df['high_risk_words'] = plus_word_list
+            risk_words_df['low_risk_words'] = minus_word_list
+
+            print(risk_words_df)
 
         return train_X
 

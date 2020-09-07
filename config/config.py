@@ -10,8 +10,8 @@ def get_config():
     params['test_data'] = 'test_data.csv'
     
     ##### Preprocessing #####
-    params['user_type'] = 'all' # experienced
-    params['label_type'] = 'categorical_type2' # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+    params['user_type'] = 'all' # all, experienced
+    params['label_type'] = 'categorical_type1' # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
     params['train_test_split_ratio'] = 0.7
 
     ##### Models #####
