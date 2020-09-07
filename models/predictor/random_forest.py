@@ -25,6 +25,8 @@ class RandomForest(BasePredictor):
         if vectorizer_type == 'tf_idf':
             train_X, word_list, self.vectorizer = self.tfidf_vectorizer(risk_desc_list, min_df=self.min_df, max_features=self.max_features)
             
+            print("   Size of Words",len(word_list))
+
         elif vectorizer_type == 'correlation_filtering':
             pass
 
@@ -42,13 +44,13 @@ class RandomForest(BasePredictor):
         return label
 
     def fit_model(self, train_X, train_Y, n_estimators):
-        self.text_classifier = RandomForestClassifier(n_estimators=n_estimators)  
-        self.text_classifier.fit(train_X, train_Y)        
+        self.prediction_model = RandomForestClassifier(n_estimators=n_estimators)  
+        self.prediction_model.fit(train_X, train_Y)        
 
         return self
 
     def predict_model(self, test_X):
-        prediction = self.text_classifier.predict(test_X)
+        prediction = self.prediction_model.predict(test_X)
         
         return prediction
 
@@ -83,5 +85,5 @@ class RandomForest(BasePredictor):
 
         # Evaluation
         self.evaluation(prediction, test_Y)
-        
+
         return self

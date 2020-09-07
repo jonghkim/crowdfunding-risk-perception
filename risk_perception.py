@@ -11,19 +11,21 @@ from models.pipeline.label_generator.label_generator import LabelGenerator
 
 from sklearn.model_selection import train_test_split
 
+from models.predictor.random_forest import RandomForest
+
 class RiskPerception:
     def __init__(self):
-        config = get_config()
+        self.config = get_config()
 
         ##### Data #####
-        self.data_dir = config['data_dir']
-        self.training_data = config['training_data']
-        self.test_data = config['test_data']
+        self.data_dir = self.config['data_dir']
+        self.training_data = self.config['training_data']
+        self.test_data = self.config['test_data']
 
         ##### Preprocessing #####
-        self.user_type = config['user_type']
-        self.label_type = config['label_type']
-        self.train_test_split_ratio = config['train_test_split_ratio']
+        self.user_type = self.config['user_type']
+        self.label_type = self.config['label_type']
+        self.train_test_split_ratio = self.config['train_test_split_ratio']
     
     def get_data(self):        
         raw_df = pd.read_csv(os.path.join(self.data_dir, self.training_data), engine='python')
@@ -108,21 +110,27 @@ class RiskPerception:
 
         return train_df, test_df
 
-    def train(self, train_df, test_df):
+    def fit_transform_models(self, train_df, test_df):
         # Prediction Models for Categorical Label 
         ## Model1. TF-IDF + RandomForest
+        model1_params = self.config['model1_params']
+
+        model1_predictor = RandomForest()
+        model1_predictor.run(train_df, test_df, model1_params)
 
         ## Model2. Correlation Filtering + RandomForest 
+        model2_params = self.config['model2_params']
 
         ## Model3. Correlation Filtering + Two Topic Model
+        model3_params = self.config['model3_params']
 
         # Prediction Models for Numerical Label
         ## Model4. TF-IDF + ElasticNet
+        model4_params = self.config['model4_params']
 
         ## Model5. Correlation Filtering + ElasticNet        
-        pass
+        model5_params = self.config['model5_params']
 
-    def predict(self):
         pass
 
     def run(self):
@@ -132,6 +140,7 @@ class RiskPerception:
 
         train_df, test_df = self.split_data(perceived_risk_df, self.train_test_split_ratio)
 
+        self.fit_transform_models(train_df, test_df)
         pass
 
 if __name__ == '__main__':
