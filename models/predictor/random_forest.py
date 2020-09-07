@@ -18,13 +18,17 @@ class RandomForest(BasePredictor):
         self.min_df = params['vectorizer']['min_df']
         self.max_features = params['vectorizer']['max_features']
 
+        if self.vectorizer_type == 'correlation_filtering':
+            self.alpha = params['vectorizer']['alpha']     
+            self.kappa = params['vectorizer']['kappa']     
+
         # predictor
         self.model_type = params['predictor']['model_type']
         self.n_estimators = params['predictor']['n_estimators']
 
         return self
 
-    def fit_vectorizer(self, risk_desc_list, vectorizer_type):
+    def fit_vectorizer(self, risk_desc_list, vectorizer_type, label=None):
         if vectorizer_type == 'tf_idf':
             tfidf_vectorizer = VectorizerTfidf()
             train_X, word_list, self.vectorizer = tfidf_vectorizer.fit_transform(risk_desc_list, min_df=self.min_df, max_features=self.max_features)
@@ -32,20 +36,24 @@ class RandomForest(BasePredictor):
             print("   Size of Words",len(word_list))
 
         elif vectorizer_type == 'correlation_filtering':
-            corr_filtering_vectorizer = VectorizerCorrelationFiltering
-            
-            pass
+            corr_filtering_vectorizer = VectorizerCorrelationFiltering()
+            train_X, plus_word_list, minus_word_list, self.vectorizer, self.S_hat = corr_filtering_vectorizer.fit_transform(risk_desc_list, label, 
+                                                                                    self.min_df, self.max_features, self.alpha, self.kappa)
 
-        return train_X, word_list
+            print("   Size of Positive Words: ", len(plus_word_list))
+            print("   Size of Negative Words: ", len(minus_word_list))
+
+        return train_X
 
     def transform_vectorizer(self, risk_desc_list, vectorizer_type):
         if vectorizer_type == 'tf_idf':
             test_X = self.vectorizer.transform(risk_desc_list)
             test_X = test_X.toarray()
+            
         elif vectorizer_type == 'correlation_filtering':
             test_X = self.vectorizer.transform(risk_desc_list)
-            test_X = test_X.toarray()                        
-            pass
+            test_X = test_X.toarray()         
+            test_X = test_X[:, self.S_hat]             
 
         return test_X
 
@@ -85,8 +93,12 @@ class RandomForest(BasePredictor):
         test_Y = self.get_label(test_df)
         
         # Get Features
-        train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type)
-        test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
+        if self.vectorizer_type == 'tf_idf':
+            train_X = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type)
+            test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
+        elif self.vectorizer_type == 'correlation_filtering':
+            train_X = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type, train_Y)
+            test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
 
         # Fit Model
         self.fit_model(train_X, train_Y, self.n_estimators)

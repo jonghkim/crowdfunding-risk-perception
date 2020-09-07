@@ -60,12 +60,3 @@ class VectorizerCorrelationFiltering:
         minus_word_list = [word_list[index] for index in S_minus]
 
         return train_D_S, plus_word_list, minus_word_list, vectorizer, S_hat
-
-    def transform(self, risk_desc_list, vectorizer, S_hat):
-        test_X = vectorizer.transform(risk_desc_list)
-        test_X = test_X.toarray()        
-
-        test_D_S = test_X[:, S_hat]
-
-        return test_D_S
-
