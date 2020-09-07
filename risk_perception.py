@@ -9,6 +9,8 @@ from config.config import get_config
 from models.pipeline.text_normalizer.text_normalizer import TextNormalizer
 from models.pipeline.label_generator.label_generator import LabelGenerator
 
+from sklearn.model_selection import train_test_split
+
 class RiskPerception:
     def __init__(self):
         config = get_config()
@@ -101,6 +103,12 @@ class RiskPerception:
 
         return perceived_risk_df
 
+    def split_data(self, perceived_risk_df, train_test_split_ratio):
+
+        train_df, test_df = train_test_split(perceived_risk_df, train_size=train_test_split_ratio)
+
+        return train_df, test_df
+
     def train(self):
         pass
 
@@ -109,8 +117,11 @@ class RiskPerception:
 
     def run(self):
         raw_df = self.get_data()
-        perceived_risk_df = self.preprocessing(raw_df, self.user_type, self.label_type)
         
+        perceived_risk_df = self.preprocessing(raw_df, self.user_type, self.label_type)
+
+        train_df, test_df = self.split_data(perceived_risk_df, self.train_test_split_ratio)
+
         pass
 
 if __name__ == '__main__':
