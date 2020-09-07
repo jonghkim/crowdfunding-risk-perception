@@ -7,7 +7,7 @@ class BasePredictor:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def set_data(self):
+    def set_config(self):
         pass
 
     @abstractmethod
@@ -49,18 +49,18 @@ class BasePredictor:
 
     @classmethod
     def get_confusion_matrix(self, prediction, true_label):
-        print("===== Confusion Matrix =====")
+        print("#### Confusion Matrix ####")
         print(confusion_matrix(prediction, true_label))  
         return self
     
     @classmethod
     def get_classification_report(self, prediction, true_label):
-        print("===== Classification Report =====")        
+        print("#### Classification Report ####")
         print(classification_report(prediction, true_label))  
         return self
 
     @classmethod
     def get_accuracy_score(self, prediction, true_label):
-        print("===== Accuracy Score =====")        
+        print("#### Accuracy Score ####")
         print(accuracy_score(prediction, true_label))
         return self

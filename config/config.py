@@ -17,21 +17,21 @@ def get_config():
     ##### Models #####
     ## Prediction Models for Categorical Label
     # Model1. RandomForest with TF-IDF
-    params['model1_params'] = {'min_df':10, 'max_features':3000}
+    params['model1_params'] = {'vectorizer': {'type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
+                               'estimator': {'type': 'random_forest', 'n_estimators':100}}
 
     # Model2. RandomForest with Correlation Filtering
-    params['model2_params'] = {'min_df':10, 'max_features': 3000, 
-                               'alpha': 0.1, # alpha: correlation filter    
-                               'kappa': 0.01, # kappa: words frequency filter
-                               }  
+    params['model2_params'] = {'vectorizer': {'type': 'correlation_filtering', 'min_df': 10, 'max_features': 3000,
+                                             'alpha':0.1, # alpha: correlation filter    
+                                             'kappa':0.01}, # kappa: words frequency filter
+                               'estimator': {'type': 'random_forest', 'n_estimators':100}}
 
     # Modle3. Two Topic Model with Correlation Filtering
-    params['model3_params'] = {'min_df':10, 'max_features': 3000, 
-                               'alpha': 0.1, # alpha: correlation filter
-                               'kappa': 0.01, # kappa: words frequency filter
-                               'lamb':5, #lamb: beta priori penalty
-                               }
-
+    params['model3_params'] = {'vectorizer': {'type': 'correlation_filtering', 'min_df': 10, 'max_features': 3000,
+                                             'alpha':0.1, # alpha: correlation filter    
+                                             'kappa':0.01}, # kappa: words frequency filter
+                               'estimator': {'type': 'two_topic_model', 
+                                             'lamb':5}} #lamb: beta priori penalty
 
     ## Prediction Models for Numerical Label
     # Model4. ElasticNet with TF-IDF
