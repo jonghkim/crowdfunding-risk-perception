@@ -11,7 +11,11 @@ class BasePredictor:
         pass
 
     @abstractmethod
-    def get_vectorizer(self):
+    def fit_vectorizer(self):
+        pass
+
+    @abstractmethod
+    def transform_vectorizer(self):
         pass
 
     @abstractmethod
@@ -19,11 +23,11 @@ class BasePredictor:
         pass
 
     @abstractmethod
-    def fit_transform(self):
+    def fit_model(self):
         pass
 
     @abstractmethod
-    def transform(self):
+    def predict_model(self):
         pass
 
     @abstractmethod
@@ -31,21 +35,16 @@ class BasePredictor:
         pass
 
     @classmethod
-    def tfidf_vectorizer(self, train_df, test_df, min_df=30, max_features=3000):
-        train_df.dropna(subset=['risk_desc'],inplace=True)
-        
-        print("    Number of Documents: {}".format(train_df.shape[0]))
+    def tfidf_vectorizer(self, risk_desc_list, min_df=30, max_features=3000):        
+        print("    Number of Documents: {}".format(len(risk_desc_list)))
         vectorizer = TfidfVectorizer(min_df=min_df, max_features=max_features)
 
-        train_X = vectorizer.fit_transform(train_df['risk_desc'].tolist())
+        train_X = vectorizer.fit_transform(risk_desc_list)
         train_X = train_X.toarray()
 
         word_list = vectorizer.get_feature_names()       
-        
-        test_X = vectorizer.transform(test_df['risk_desc'].tolist())
-        test_X = test_X.toarray()
 
-        return train_X, test_X, word_list
+        return train_X, word_list, vectorizer
 
     @classmethod
     def get_confusion_matrix(self, prediction, true_label):
