@@ -121,6 +121,9 @@ class RiskPerception:
         ## Model2. Correlation Filtering + RandomForest 
         model2_params = self.config['model2_params']
 
+        model2_predictor = RandomForest()
+        model2_predictor.run(train_df, test_df, model2_params)
+        
         ## Model3. Correlation Filtering + Two Topic Model
         model3_params = self.config['model3_params']
 
