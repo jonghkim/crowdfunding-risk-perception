@@ -1,5 +1,6 @@
 from models.predictor.base_predictor import BasePredictor
 from sklearn.ensemble import RandomForestClassifier
+from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
 import numpy as np
 
 class RandomForest(BasePredictor):
@@ -23,7 +24,8 @@ class RandomForest(BasePredictor):
 
     def fit_vectorizer(self, risk_desc_list, vectorizer_type):
         if vectorizer_type == 'tf_idf':
-            train_X, word_list, self.vectorizer = self.tfidf_vectorizer(risk_desc_list, min_df=self.min_df, max_features=self.max_features)
+            tfidf_vectorizer = VectorizerTfidf()
+            train_X, word_list, self.vectorizer = tfidf_vectorizer.fit_transform(risk_desc_list, min_df=self.min_df, max_features=self.max_features)
             
             print("   Size of Words",len(word_list))
 
