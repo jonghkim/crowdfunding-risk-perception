@@ -1,6 +1,8 @@
 from models.predictor.base_predictor import BasePredictor
 from sklearn.ensemble import RandomForestClassifier
 from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
+from models.vectorizer.vectorizer_correlation_filtering import VectorizerCorrelationFiltering
+
 import numpy as np
 
 class RandomForest(BasePredictor):
@@ -30,13 +32,20 @@ class RandomForest(BasePredictor):
             print("   Size of Words",len(word_list))
 
         elif vectorizer_type == 'correlation_filtering':
+            corr_filtering_vectorizer = VectorizerCorrelationFiltering
+            
             pass
 
         return train_X, word_list
 
-    def transform_vectorizer(self, risk_desc_list):
-        test_X = self.vectorizer.transform(risk_desc_list)
-        test_X = test_X.toarray()
+    def transform_vectorizer(self, risk_desc_list, vectorizer_type):
+        if vectorizer_type == 'tf_idf':
+            test_X = self.vectorizer.transform(risk_desc_list)
+            test_X = test_X.toarray()
+        elif vectorizer_type == 'correlation_filtering':
+            test_X = self.vectorizer.transform(risk_desc_list)
+            test_X = test_X.toarray()                        
+            pass
 
         return test_X
 
@@ -70,14 +79,14 @@ class RandomForest(BasePredictor):
         
         # Set Config
         self.set_config(params)
-        
-        # Get Features
-        train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type)
-        test_X = self.transform_vectorizer(test_df['risk_desc'].tolist())
 
         # Get Label
         train_Y = self.get_label(train_df)
         test_Y = self.get_label(test_df)
+        
+        # Get Features
+        train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type)
+        test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
 
         # Fit Model
         self.fit_model(train_X, train_Y, self.n_estimators)
