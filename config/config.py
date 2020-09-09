@@ -18,13 +18,35 @@ def get_config():
     ## Prediction Models for Categorical Label
     # Model1. RandomForest with TF-IDF
     params['model1_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
-                               'predictor': {'model_type': 'random_forest', 'n_estimators':100, 'plot_feature_importance':False}}
+                               'predictor': {'model_type': 'random_forest',
+                                             'cross_validation_grid_search': True,
+                                             'param_grid': {
+                                                            'bootstrap': [True],
+                                                            'max_depth': [10, 50, None],
+                                                            'max_features': ['log2', 'sqrt'],
+                                                            'min_samples_leaf': [3, 5],
+                                                            'min_samples_split': [5, 10],
+                                                            'n_estimators': [100]
+                                                           },
+                                            'plot_feature_importance':False}
+                              }
 
     # Model2. RandomForest with Correlation Filtering
     params['model2_params'] = {'vectorizer': {'vectorizer_type': 'correlation_filtering', 'min_df': 10, 'max_features': 3000,
                                              'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.01}, # kappa: words frequency filter
-                               'predictor': {'model_type': 'random_forest', 'n_estimators':100, 'plot_feature_importance':False}}
+                               'predictor': {'model_type': 'random_forest',
+                                             'cross_validation_grid_search': True,
+                                             'param_grid': {
+                                                            'bootstrap': [True],
+                                                            'max_depth': [10, 50, None],
+                                                            'max_features': ['log2', 'sqrt'],
+                                                            'min_samples_leaf': [3, 5],
+                                                            'min_samples_split': [5, 10],
+                                                            'n_estimators': [100]
+                                                           },
+                                             'plot_feature_importance':False}
+                              }
 
     # Modle3. Two Topic Model with Correlation Filtering
     params['model3_params'] = {'vectorizer': {'vectorizer_type': 'correlation_filtering', 'min_df': 10, 'max_features': 3000,

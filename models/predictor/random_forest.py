@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 
 from models.predictor.base_predictor import BasePredictor
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
 from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
 from models.vectorizer.vectorizer_correlation_filtering import VectorizerCorrelationFiltering
 
@@ -27,7 +29,8 @@ class RandomForest(BasePredictor):
 
         # predictor
         self.model_type = params['predictor']['model_type']
-        self.n_estimators = params['predictor']['n_estimators']
+        self.cross_validation_grid_search = params['predictor']['cross_validation_grid_search']
+        self.param_grid = params['predictor']['param_grid']
 
         self.plot_feature_importance = params['predictor']['plot_feature_importance']
 
@@ -76,9 +79,21 @@ class RandomForest(BasePredictor):
 
         return label
 
-    def fit_model(self, train_X, train_Y, n_estimators):
-        self.prediction_model = RandomForestClassifier(n_estimators=n_estimators)  
-        self.prediction_model.fit(train_X, train_Y)        
+    def fit_model(self, train_X, train_Y, cross_validation_grid_search, param_grid):
+        self.prediction_model = RandomForestClassifier() 
+
+        if cross_validation_grid_search == True:
+            grid_search = GridSearchCV(estimator = self.prediction_model, param_grid = param_grid, 
+                                    cv = 3, n_jobs = -1, verbose = 2)
+            grid_search.fit(train_X, train_Y)
+
+            print("#### Best Grid Search Output ####")
+            print(grid_search.best_params_)
+
+            self.prediction_model = grid_search.best_estimator_
+
+        else:
+            self.prediction_model.fit(train_X, train_Y)
 
         return self
 
@@ -164,7 +179,10 @@ class RandomForest(BasePredictor):
             test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
 
         # Fit Model
-        self.fit_model(train_X, train_Y, self.n_estimators)
+        if self.cross_validation_grid_search == True:
+            self.fit_model(train_X, train_Y, self.cross_validation_grid_search, self.param_grid)
+        else:
+            self.fit_model(train_X, train_Y, self.cross_validation_grid_search)
 
         if self.plot_feature_importance == True:
             self.feature_importance_analysis(word_list, self.vectorizer_type)
