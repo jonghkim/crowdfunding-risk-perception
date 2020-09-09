@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.metrics import mean_absolute_error
 
 class BasePredictor:
 
@@ -33,6 +34,12 @@ class BasePredictor:
     def run(self):
         pass
 
+    @classmethod
+    def mean_absolute_error(self, prediction, true_label):
+        print("#### Mean Absoulte Error ####")
+        print(mean_absolute_error(true_label, prediction))  
+        return self
+    
     @classmethod
     def get_confusion_matrix(self, prediction, true_label):
         print("#### Confusion Matrix ####")

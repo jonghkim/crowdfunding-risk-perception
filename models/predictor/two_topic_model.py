@@ -197,13 +197,14 @@ class TwoTopicModel(BasePredictor):
     def evaluation(self, prediction_list, test_Y):
         print("### Model - Two Topic Model ###")
         print("#### Setting: ", self.config)
-        # MAE Evaluation
-        
 
-        # Categorical Evaluation
         prediction_np = np.array(prediction_list)
         prediction_np[prediction_np==None]=0.5
+        
+        # MAE Evaluation
+        self.mean_absolute_error(prediction_np-0.5, test_Y)
 
+        # Categorical Evaluation
         prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction_np])
         test_Y_category = np.array([1 if score > 0 else 0 for score in test_Y])
 
