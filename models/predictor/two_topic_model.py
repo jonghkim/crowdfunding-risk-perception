@@ -214,6 +214,8 @@ class TwoTopicModel:
         prediction_df.hist(bins=100)
         plt.savefig('results/two_topic_prediction_hist.jpg')
 
-        #self.evaluation(prediction, test_Y)
+        prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction])
+        test_Y_category = np.array([1 if score > 0.5 else 0 for score in test_Y])
+        self.evaluation(prediction_category, test_Y_category)
 
         return self
