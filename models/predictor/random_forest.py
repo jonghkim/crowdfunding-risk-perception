@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from models.predictor.base_predictor import BasePredictor
 from sklearn.ensemble import RandomForestClassifier
 from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
@@ -72,10 +74,13 @@ class RandomForest(BasePredictor):
 
         return label
 
-    def fit_model(self, train_X, train_Y, word_list, n_estimators):
+    def fit_model(self, train_X, train_Y, n_estimators):
         self.prediction_model = RandomForestClassifier(n_estimators=n_estimators)  
         self.prediction_model.fit(train_X, train_Y)        
 
+        return self
+
+    def feature_importance_analysis(self, word_list, vectorizer_type):
         # Get numerical feature importances
         importances = list(self.prediction_model.feature_importances_)
         # List of tuples with variable and importance
@@ -85,6 +90,42 @@ class RandomForest(BasePredictor):
         # Print out the feature and importances 
         for pair in feature_importances[:20]:
             print('{}: {}'.format(pair[0], pair[1]))
+
+        #### text - importance ####
+        # Set the style
+        plt.figure()
+
+        plt.style.use('fivethirtyeight')
+        # list of x locations for plotting
+        x_values = list(range(len(importances)))
+        # Make a bar chart
+        plt.bar(x_values, importances, orientation = 'vertical')
+        # Tick labels for x axis
+        plt.xticks(x_values, word_list, rotation='vertical')
+        # Axis labels and title
+        plt.ylabel('Importance')
+        plt.xlabel('Variable')
+        plt.title('Variable Importances')
+        plt.savefig('results/rf_{}.jpg'.format(vectorizer_type))
+
+        #### text - cumulative importance ####
+        plt.figure()        
+        # List of features sorted from most to least important
+        sorted_importances = [importance[1] for importance in feature_importances]
+        sorted_features = [importance[0] for importance in feature_importances]
+        # Cumulative importances
+        cumulative_importances = np.cumsum(sorted_importances)
+        # Make a line graph
+        plt.plot(x_values, cumulative_importances, 'g-')
+        # Draw line at 95% of importance retained
+        plt.hlines(y = 0.95, xmin=0, xmax=len(sorted_importances), color = 'r', linestyles = 'dashed')
+        # Format x ticks and labels
+        plt.xticks(x_values, sorted_features, rotation = 'vertical')
+        # Axis labels and title
+        plt.xlabel('Variable')
+        plt.ylabel('Cumulative Importance')
+        plt.title('Cumulative Importances')
+        plt.savefig('results/rf_cumulative_{}.jpg'.format(vectorizer_type))
 
         return self
 
@@ -121,7 +162,9 @@ class RandomForest(BasePredictor):
             test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
 
         # Fit Model
-        self.fit_model(train_X, train_Y, word_list, self.n_estimators)
+        self.fit_model(train_X, train_Y, self.n_estimators)
+
+        self.feature_importance_analysis(word_list, self.vectorizer_type)
 
         # Prediction
         prediction = self.predict_model(test_X)
