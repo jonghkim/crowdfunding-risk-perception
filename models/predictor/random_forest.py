@@ -29,6 +29,8 @@ class RandomForest(BasePredictor):
         self.model_type = params['predictor']['model_type']
         self.n_estimators = params['predictor']['n_estimators']
 
+        self.plot_feature_importance = params['predictor']['plot_feature_importance']
+
         return self
 
     def fit_vectorizer(self, risk_desc_list, vectorizer_type, label=None):
@@ -164,7 +166,8 @@ class RandomForest(BasePredictor):
         # Fit Model
         self.fit_model(train_X, train_Y, self.n_estimators)
 
-        self.feature_importance_analysis(word_list, self.vectorizer_type)
+        if self.plot_feature_importance == True:
+            self.feature_importance_analysis(word_list, self.vectorizer_type)
 
         # Prediction
         prediction = self.predict_model(test_X)
