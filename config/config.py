@@ -57,7 +57,7 @@ def get_config():
                                              'alpha_plus':0.25, # high risk words
                                              'alpha_minus':0.25, # low risk words
                                              'kappa':0.01, # min doc filter
-                                             'lamb':5}  #lamb: beta priori penalty
+                                             'lamb':1}  #lamb: beta priori penalty
                                }
     ## Prediction Models for Numerical Label
     # Model4. ElasticNet with TF-IDF

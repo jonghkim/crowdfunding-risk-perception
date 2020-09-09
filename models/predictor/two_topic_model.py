@@ -7,11 +7,12 @@ import os
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
 
+from models.predictor.base_predictor import BasePredictor
 from models.pipeline.label_generator.label_generator import LabelGenerator
 
 from scipy.optimize import minimize
 
-class TwoTopicModel:
+class TwoTopicModel(BasePredictor):
     def __init__(self):
         self.vectorizer = None
         self.S_hat = None
@@ -22,6 +23,8 @@ class TwoTopicModel:
         self.O_hat = None
 
     def set_config(self, params):
+        self.config = params
+
         # vectorizer
         self.min_df = params['vectorizer']['min_df']
         self.max_features = params['vectorizer']['max_features']
@@ -44,7 +47,7 @@ class TwoTopicModel:
         
         return label
 
-    def train_word_vectorizer(self, train_df, min_df=10, max_features=1000):
+    def fit_vectorizer(self, train_df, min_df=10, max_features=1000):
         #min_df = int(sentiment_df.shape[0]*min_df)
         train_df.dropna(subset=['risk_desc'],inplace=True)
         print("    Number of Training Text: {}".format(train_df.shape[0]))
@@ -63,7 +66,7 @@ class TwoTopicModel:
 
         return X
     
-    def test_word_vectorizer(self, test_df):
+    def transform_vectorizer(self, test_df):
         X = self.vectorizer.transform(test_df['risk_desc'].tolist())
         X = X.toarray()
         
@@ -158,7 +161,7 @@ class TwoTopicModel:
 
         return p_hat['x'][0]
 
-    def fit(self, X, y, alpha_plus=0.25, alpha_minus=0.25, kappa=0.01):
+    def fit_model(self, X, y, alpha_plus=0.25, alpha_minus=0.25, kappa=0.01):
         S_hat, S_plus, S_minus = self.sreen_sentiment_charged_words(X, y, alpha_plus, alpha_minus, kappa)
         O_hat = self.estimate_two_topic(y, X, S_hat)
         
@@ -169,7 +172,16 @@ class TwoTopicModel:
         sentiment = self.maximum_likelihood_estimate(d, S_hat, S_plus, S_minus, O_hat, lamb)
 
         return sentiment    
+
+    def predict_model(self, test_X):
     
+        prediction_list = []
+
+        for x in test_X:
+            prediction_list.append(self.predict(x, self.S_hat, self.S_plus, self.S_minus, self.O_hat, self.lamb))
+
+        return prediction_list
+
     def get_topic_df(self):
 
         word_list = self.word_list
@@ -182,6 +194,25 @@ class TwoTopicModel:
 
         return topic_df
 
+    def evaluation(self, prediction_list, test_Y):
+        print("### Model - Two Topic Model ###")
+        print("#### Setting: ", self.config)
+        # MAE Evaluation
+        
+
+        # Categorical Evaluation
+        prediction_np = np.array(prediction_list)
+        prediction_np[prediction_np==None]=0.5
+
+        prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction_np])
+        test_Y_category = np.array([1 if score > 0 else 0 for score in test_Y])
+
+        self.get_confusion_matrix(prediction_category, test_Y_category)
+        self.get_classification_report(prediction_category, test_Y_category)
+        self.get_accuracy_score(prediction_category, test_Y_category)
+        
+        return self        
+
     def run(self, train_df, test_df, params):
         
         # Set Config
@@ -192,30 +223,25 @@ class TwoTopicModel:
         test_Y = self.get_label(test_df, self.label_type)
 
         # Train Model
-        X = self.train_word_vectorizer(train_df)
+        X = self.fit_vectorizer(train_df)
 
-        self.fit(X, train_Y, self.alpha_plus, self.alpha_minus, self.kappa)
+        self.fit_model(X, train_Y, self.alpha_plus, self.alpha_minus, self.kappa)
 
         # Predict
-        test_X = self.test_word_vectorizer(test_df)
-
-        prediction_list = []
-
-        for x in test_X:
-            prediction_list.append(self.predict(x, self.S_hat, self.S_plus, self.S_minus, self.O_hat, self.lamb))
+        test_X = self.transform_vectorizer(test_df)
 
         # Evaluation
         word_df = self.get_topic_df()
         word_df.to_csv('results/two_topic_score.csv')
 
         # Prediction Score Distribution
+        prediction_list = self.predict_model(test_X)
         prediction_df = pd.DataFrame(prediction_list)
         #prediction_df = prediction_df[prediction_df[0]> 0.01]
         prediction_df.hist(bins=100)
         plt.savefig('results/two_topic_prediction_hist.jpg')
 
-        prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction])
-        test_Y_category = np.array([1 if score > 0.5 else 0 for score in test_Y])
-        self.evaluation(prediction_category, test_Y_category)
+        # Evaluation
+        self.evaluation(prediction_list, test_Y)
 
         return self
