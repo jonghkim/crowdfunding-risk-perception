@@ -51,7 +51,9 @@ class RandomForest(BasePredictor):
 
             print(risk_words_df)
 
-        return train_X
+            word_list = plus_word_list + minus_word_list
+
+        return train_X, word_list
 
     def transform_vectorizer(self, risk_desc_list, vectorizer_type):
         if vectorizer_type == 'tf_idf':
@@ -70,9 +72,19 @@ class RandomForest(BasePredictor):
 
         return label
 
-    def fit_model(self, train_X, train_Y, n_estimators):
+    def fit_model(self, train_X, train_Y, word_list, n_estimators):
         self.prediction_model = RandomForestClassifier(n_estimators=n_estimators)  
         self.prediction_model.fit(train_X, train_Y)        
+
+        # Get numerical feature importances
+        importances = list(self.prediction_model.feature_importances_)
+        # List of tuples with variable and importance
+        feature_importances = [(feature, round(importance, 4)) for feature, importance in zip(word_list, importances)]
+        # Sort the feature importances by most important first
+        feature_importances = sorted(feature_importances, key = lambda x: x[1], reverse = True)
+        # Print out the feature and importances 
+        for pair in feature_importances[:20]:
+            print('{}: {}'.format(pair[0], pair[1]))
 
         return self
 
@@ -102,14 +114,14 @@ class RandomForest(BasePredictor):
         
         # Get Features
         if self.vectorizer_type == 'tf_idf':
-            train_X = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type)
+            train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type)
             test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
         elif self.vectorizer_type == 'correlation_filtering':
-            train_X = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type, train_Y)
+            train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type, train_Y)
             test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
 
         # Fit Model
-        self.fit_model(train_X, train_Y, self.n_estimators)
+        self.fit_model(train_X, train_Y, word_list, self.n_estimators)
 
         # Prediction
         prediction = self.predict_model(test_X)
