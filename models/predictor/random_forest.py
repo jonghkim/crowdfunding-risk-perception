@@ -7,6 +7,8 @@ from sklearn.model_selection import GridSearchCV
 from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
 from models.vectorizer.vectorizer_correlation_filtering import VectorizerCorrelationFiltering
 
+from models.pipeline.label_generator.label_generator import LabelGenerator
+
 import numpy as np
 import pandas as pd
 
@@ -29,6 +31,7 @@ class RandomForest(BasePredictor):
 
         # predictor
         self.model_type = params['predictor']['model_type']
+        self.label_type = params['predictor']['label_type']        
         self.param_grid = params['predictor']['param_grid']
         self.k_fold_cv = params['predictor']['k_fold_cv']
 
@@ -74,8 +77,10 @@ class RandomForest(BasePredictor):
 
         return test_X
 
-    def get_label(self, df):
-        label = np.array(df['label'].tolist())
+    def get_label(self, df, label_type):
+        label_generator = LabelGenerator()
+        label = label_generator.get_label(df['perceived_risk'].tolist(), label_type)
+        label = np.array(label)
 
         return label
 
@@ -163,8 +168,8 @@ class RandomForest(BasePredictor):
         self.set_config(params)
 
         # Get Label
-        train_Y = self.get_label(train_df)
-        test_Y = self.get_label(test_df)
+        train_Y = self.get_label(train_df, self.label_type)
+        test_Y = self.get_label(test_df, self.label_type)
         
         # Get Features
         if self.vectorizer_type == 'tf_idf':

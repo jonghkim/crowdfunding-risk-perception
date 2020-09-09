@@ -7,11 +7,11 @@ import os
 from config.config import get_config
 
 from models.pipeline.text_normalizer.text_normalizer import TextNormalizer
-from models.pipeline.label_generator.label_generator import LabelGenerator
 
 from sklearn.model_selection import train_test_split
 
 from models.predictor.random_forest import RandomForest
+from models.predictor.two_topic_model import TwoTopicModel
 
 class RiskPerception:
     def __init__(self):
@@ -24,7 +24,6 @@ class RiskPerception:
 
         ##### Preprocessing #####
         self.user_type = self.config['user_type']
-        self.label_type = self.config['label_type']
         self.train_test_split_ratio = self.config['train_test_split_ratio']
     
     def get_data(self):        
@@ -81,22 +80,10 @@ class RiskPerception:
 
         return perceived_risk_df
 
-    def label_generation(self, perceived_risk_df, label_type):
-        print("## Label Generation")
-        label_generator = LabelGenerator()
-        label = label_generator.get_label(perceived_risk_df['perceived_risk'].tolist(), label_type)
-        
-        perceived_risk_df['label'] = label
-
-        return perceived_risk_df
-
-    def preprocessing(self, raw_df, user_type, label_type):
+    def preprocessing(self, raw_df, user_type):
         print("# Preprocessing")
         # Aggregate into Project-Level Data
         perceived_risk_df = self.get_project_level_perceived_risk(raw_df, user_type)
-
-        # Get Label
-        perceived_risk_df = self.label_generation(perceived_risk_df, label_type)
 
         # Normalize Risk Description
         perceived_risk_df = self.normalizing_risk_description(perceived_risk_df)
@@ -111,6 +98,7 @@ class RiskPerception:
         return train_df, test_df
 
     def fit_transform_models(self, train_df, test_df):
+        """
         # Prediction Models for Categorical Label 
         ## Model1. TF-IDF + RandomForest
         model1_params = self.config['model1_params']
@@ -123,9 +111,11 @@ class RiskPerception:
 
         model2_predictor = RandomForest()
         model2_predictor.run(train_df, test_df, model2_params)
-        
+        """
         ## Model3. Correlation Filtering + Two Topic Model
         model3_params = self.config['model3_params']
+        model3_predictor = TwoTopicModel()
+        model3_predictor.run(train_df, test_df, model3_params)
 
         # Prediction Models for Numerical Label
         ## Model4. TF-IDF + ElasticNet
@@ -139,7 +129,7 @@ class RiskPerception:
     def run(self):
         raw_df = self.get_data()
 
-        perceived_risk_df = self.preprocessing(raw_df, self.user_type, self.label_type)
+        perceived_risk_df = self.preprocessing(raw_df, self.user_type)
 
         train_df, test_df = self.split_data(perceived_risk_df, self.train_test_split_ratio)
 

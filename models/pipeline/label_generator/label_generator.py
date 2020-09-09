@@ -3,7 +3,7 @@ class LabelGenerator:
     def get_label(self, perceived_risk, label_type):
 
         if label_type == 'numerical':
-            perceived_risk = [risk/float(5) for risk in perceived_risk]
+            perceived_risk = [(risk-3)/float(4) for risk in perceived_risk]
             return perceived_risk
 
         elif label_type == 'categorical_type1':

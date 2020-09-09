@@ -11,7 +11,6 @@ def get_config():
     
     ##### Preprocessing #####
     params['user_type'] = 'all' # all, experienced
-    params['label_type'] = 'categorical_type1' # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
     params['train_test_split_ratio'] = 0.7
 
     ##### Models #####
@@ -19,6 +18,7 @@ def get_config():
     # Model1. RandomForest with TF-IDF
     params['model1_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
                                'predictor': {'model_type': 'random_forest',
+                                             'label_type': 'categorical_type1', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'param_grid': {
                                                             'bootstrap': [True],
@@ -36,6 +36,7 @@ def get_config():
                                              'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.01}, # kappa: words frequency filter
                                'predictor': {'model_type': 'random_forest',
+                                             'label_type': 'categorical_type1', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'param_grid': {
                                                             'bootstrap': [True],
@@ -49,12 +50,15 @@ def get_config():
                               }
 
     # Modle3. Two Topic Model with Correlation Filtering
-    params['model3_params'] = {'vectorizer': {'vectorizer_type': 'correlation_filtering', 'min_df': 10, 'max_features': 3000,
-                                             'alpha':0.1, # alpha: correlation filter    
-                                             'kappa':0.01}, # kappa: words frequency filter
-                               'predictor': {'model_type': 'two_topic_model', 
-                                             'lamb':5}} #lamb: beta priori penalty
-
+    params['model3_params'] = {'vectorizer': {'min_df': 10, 'max_features': 3000
+                                             },
+                                'predictor': {'model_type': 'two_topic_model', 
+                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'alpha_plus':0.25, # high risk words
+                                             'alpha_minus':0.25, # low risk words
+                                             'kappa':0.01, # min doc filter
+                                             'lamb':5}  #lamb: beta priori penalty
+                               }
     ## Prediction Models for Numerical Label
     # Model4. ElasticNet with TF-IDF
     params['model4_params'] = {}
