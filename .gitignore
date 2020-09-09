@@ -1,4 +1,10 @@
 __pycache__
 data/*.csv
+data/*.xlsx
 results/*.csv
 results/*.jpg
+notebook/*.csv
+notebook/*.xlsx
+notebook/*.pkl
+notebook/.ipynb_checkpoints
+notebook/chromedriver
