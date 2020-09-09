@@ -19,14 +19,14 @@ def get_config():
     # Model1. RandomForest with TF-IDF
     params['model1_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
                                'predictor': {'model_type': 'random_forest',
-                                             'cross_validation_grid_search': True,
+                                             'k_fold_cv':5,
                                              'param_grid': {
                                                             'bootstrap': [True],
-                                                            'max_depth': [10, 50, None],
+                                                            'max_depth': [None], #10, 50, None
                                                             'max_features': ['log2', 'sqrt'],
-                                                            'min_samples_leaf': [3, 5],
-                                                            'min_samples_split': [5, 10],
-                                                            'n_estimators': [100]
+                                                            'min_samples_leaf': [1], #1, 3, 5
+                                                            'min_samples_split': [4], #2, 5, 10
+                                                            'n_estimators': [1000]
                                                            },
                                             'plot_feature_importance':False}
                               }
@@ -36,16 +36,16 @@ def get_config():
                                              'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.01}, # kappa: words frequency filter
                                'predictor': {'model_type': 'random_forest',
-                                             'cross_validation_grid_search': True,
+                                             'k_fold_cv':5,
                                              'param_grid': {
                                                             'bootstrap': [True],
-                                                            'max_depth': [10, 50, None],
+                                                            'max_depth': [None], #10, 50, None
                                                             'max_features': ['log2', 'sqrt'],
-                                                            'min_samples_leaf': [3, 5],
-                                                            'min_samples_split': [5, 10],
-                                                            'n_estimators': [100]
+                                                            'min_samples_leaf': [1], #1, 3, 5
+                                                            'min_samples_split': [4], #2, 5, 10
+                                                            'n_estimators': [1000]
                                                            },
-                                             'plot_feature_importance':False}
+                                             'plot_feature_importance':True}
                               }
 
     # Modle3. Two Topic Model with Correlation Filtering
