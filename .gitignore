@@ -8,5 +8,7 @@ notebook/*.xlsx
 notebook/*.pkl
 notebook/.ipynb_checkpoints
 notebook/chromedriver
+notebook/geckodriver
+notebook/geckodriver.log
 notebook/html/*
 notebook/backup/*
