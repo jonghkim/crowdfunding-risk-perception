@@ -10,7 +10,7 @@ def get_config():
     params['prediction_data'] = 'prediction_data.csv'
     
     ##### Preprocessing #####
-    params['user_type'] = 'all' # all, experienced
+    params['user_type'] = 'experienced' # all, experienced
     params['train_test_split_ratio'] = 0.7
 
     ##### Models #####

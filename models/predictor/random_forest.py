@@ -144,7 +144,7 @@ class RandomForest(BasePredictor):
         plt.xlabel('Variable')
         plt.ylabel('Cumulative Importance')
         plt.title('Cumulative Importances')
-        plt.savefig('results/rf_cumulative_{}_usr_type_{}_acc_{:.2f}.csv'.format(self.vectorizer_type, self.user_type, acc))
+        plt.savefig('results/rf_cumulative_{}_usr_type_{}_acc_{:.2f}.jpg'.format(self.vectorizer_type, self.user_type, acc))
 
         return self
 

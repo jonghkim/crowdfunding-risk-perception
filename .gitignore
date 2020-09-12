@@ -3,6 +3,8 @@ data/*.csv
 data/*.xlsx
 results/*.csv
 results/*.jpg
+results/backup/*.csv
+results/backup/*.jpg
 notebook/*.csv
 notebook/*.xlsx
 notebook/*.pkl
