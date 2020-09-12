@@ -202,7 +202,7 @@ class TwoTopicModel(BasePredictor):
         prediction_np[prediction_np==None]=0.5
         
         # MAE Evaluation
-        self.mean_absolute_error(prediction_np-0.5, test_Y)
+        acc = self.mean_absolute_error(prediction_np-0.5, test_Y)
 
         # Categorical Evaluation
         prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction_np])
@@ -212,7 +212,7 @@ class TwoTopicModel(BasePredictor):
         self.get_classification_report(prediction_category, test_Y_category)
         self.get_accuracy_score(prediction_category, test_Y_category)
         
-        return self        
+        return acc        
 
     def run(self, train_df, test_df, prediction_df, params):
         
@@ -230,6 +230,7 @@ class TwoTopicModel(BasePredictor):
 
         # Predict
         test_X = self.transform_vectorizer(test_df)
+        prediction_X = self.transform_vectorizer(prediction_df)
 
         # Evaluation
         word_df = self.get_topic_df()
@@ -243,6 +244,11 @@ class TwoTopicModel(BasePredictor):
         plt.savefig('results/two_topic_prediction_hist.jpg')
 
         # Evaluation
-        self.evaluation(test_Y_hat, test_Y)
+        acc = self.evaluation(test_Y_hat, test_Y)
+
+        # Prediction
+        prediction_Y_hat = self.predict_model(prediction_X)
+        prediction_df['prediction'] = prediction_Y_hat
+        prediction_df.to_csv('../results/model_{}_alpha_{}_acc_{"%.2f"}.csv'.format('two_topic_model', self.alpha_plus, acc))
 
         return self

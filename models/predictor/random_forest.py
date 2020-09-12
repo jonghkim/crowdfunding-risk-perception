@@ -158,9 +158,9 @@ class RandomForest(BasePredictor):
 
         self.get_confusion_matrix(prediction, test_Y)
         self.get_classification_report(prediction, test_Y)
-        self.get_accuracy_score(prediction, test_Y)
+        acc = self.get_accuracy_score(prediction, test_Y)
         
-        return self
+        return acc
 
     def run(self, train_df, test_df, prediction_df, params):
         
@@ -175,9 +175,11 @@ class RandomForest(BasePredictor):
         if self.vectorizer_type == 'tf_idf':
             train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type)
             test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
+            prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
         elif self.vectorizer_type == 'correlation_filtering':
             train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type, train_Y)
             test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
+            prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
 
         # Fit Model
         self.fit_model(train_X, train_Y, self.param_grid, self.k_fold_cv)
@@ -185,10 +187,13 @@ class RandomForest(BasePredictor):
         if self.plot_feature_importance == True:
             self.feature_importance_analysis(word_list, self.vectorizer_type)
 
-        # Prediction
-        test_Y_hat = self.predict_model(test_X)
-
         # Evaluation
-        self.evaluation(test_Y_hat, test_Y)
+        test_Y_hat = self.predict_model(test_X)
+        acc = self.evaluation(test_Y_hat, test_Y)
 
+        # Prediction
+        prediction_Y_hat = self.predict_model(prediction_X)
+        prediction_df['prediction'] = prediction_Y_hat
+        prediction_df.to_csv('../results/model_{}_acc_{"%.2f"}.csv'.format('random_forest_{}'.format(self.vectorizer_type), acc))
+        
         return self
