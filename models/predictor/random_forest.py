@@ -162,22 +162,22 @@ class RandomForest(BasePredictor):
         
         return self
 
-    def run(self, train_df, test_df, params):
+    def run(self, train_df, validation_df, test_df, params):
         
         # Set Config
         self.set_config(params)
 
         # Get Label
         train_Y = self.get_label(train_df, self.label_type)
-        test_Y = self.get_label(test_df, self.label_type)
+        validation_Y = self.get_label(validation_df, self.label_type)
         
         # Get Features
         if self.vectorizer_type == 'tf_idf':
             train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type)
-            test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
+            validation_X = self.transform_vectorizer(validation_df['risk_desc'].tolist(), self.vectorizer_type)
         elif self.vectorizer_type == 'correlation_filtering':
             train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type, train_Y)
-            test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
+            validation_X = self.transform_vectorizer(validation_df['risk_desc'].tolist(), self.vectorizer_type)
 
         # Fit Model
         self.fit_model(train_X, train_Y, self.param_grid, self.k_fold_cv)
@@ -186,9 +186,9 @@ class RandomForest(BasePredictor):
             self.feature_importance_analysis(word_list, self.vectorizer_type)
 
         # Prediction
-        prediction = self.predict_model(test_X)
+        prediction = self.predict_model(validation_X)
 
         # Evaluation
-        self.evaluation(prediction, test_Y)
+        self.evaluation(prediction, validation_Y)
 
         return self

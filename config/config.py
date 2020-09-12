@@ -11,7 +11,7 @@ def get_config():
     
     ##### Preprocessing #####
     params['user_type'] = 'all' # all, experienced
-    params['train_test_split_ratio'] = 0.7
+    params['train_validation_split_ratio'] = 0.7
 
     ##### Models #####
     ## Prediction Models for Categorical Label

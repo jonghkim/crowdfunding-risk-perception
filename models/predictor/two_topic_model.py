@@ -66,8 +66,8 @@ class TwoTopicModel(BasePredictor):
 
         return X
     
-    def transform_vectorizer(self, test_df):
-        X = self.vectorizer.transform(test_df['risk_desc'].tolist())
+    def transform_vectorizer(self, df):
+        X = self.vectorizer.transform(df['risk_desc'].tolist())
         X = X.toarray()
         
         return X 
@@ -214,14 +214,14 @@ class TwoTopicModel(BasePredictor):
         
         return self        
 
-    def run(self, train_df, test_df, params):
+    def run(self, train_df, validation_df, test_df, params):
         
         # Set Config
         self.set_config(params)
 
         # Get Label
         train_Y = self.get_label(train_df, self.label_type)
-        test_Y = self.get_label(test_df, self.label_type)
+        validation_Y = self.get_label(validation_df, self.label_type)
 
         # Train Model
         X = self.fit_vectorizer(train_df)
@@ -229,20 +229,20 @@ class TwoTopicModel(BasePredictor):
         self.fit_model(X, train_Y, self.alpha_plus, self.alpha_minus, self.kappa)
 
         # Predict
-        test_X = self.transform_vectorizer(test_df)
+        validation_X = self.transform_vectorizer(validation_df)
 
         # Evaluation
         word_df = self.get_topic_df()
         word_df.to_csv('results/two_topic_score.csv')
 
         # Prediction Score Distribution
-        prediction_list = self.predict_model(test_X)
+        prediction_list = self.predict_model(validation_X)
         prediction_df = pd.DataFrame(prediction_list)
         #prediction_df = prediction_df[prediction_df[0]> 0.01]
         prediction_df.hist(bins=100)
         plt.savefig('results/two_topic_prediction_hist.jpg')
 
         # Evaluation
-        self.evaluation(prediction_list, test_Y)
+        self.evaluation(prediction_list, validation_Y)
 
         return self

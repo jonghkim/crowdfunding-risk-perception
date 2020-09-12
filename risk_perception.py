@@ -24,24 +24,26 @@ class RiskPerception:
 
         ##### Preprocessing #####
         self.user_type = self.config['user_type']
-        self.train_test_split_ratio = self.config['train_test_split_ratio']
+        self.train_validation_split_ratio = self.config['train_validation_split_ratio']
     
     def get_data(self):        
-        raw_df = pd.read_csv(os.path.join(self.data_dir, self.training_data), engine='python')
-        raw_df.columns = ['project_id','project_title','project_short_desc','project_url','risk_desc',
+        training_raw_df = pd.read_csv(os.path.join(self.data_dir, self.training_data), engine='python')
+        training_raw_df.columns = ['project_id','project_title','project_short_desc','project_url','risk_desc',
                           'perceived_risk', 'experience', 'age', 'gender'] 
 
         print("##### Raw Data Load Start #####")
-        print(raw_df.head())
+        print(training_raw_df.head())
 
-        return raw_df
+        test_raw_df = pd.read_csv(os.path.join(self.data_dir, self.test_data), engine='python')
 
-    def get_project_level_perceived_risk(self, raw_df, user_type):
+        return training_raw_df, test_raw_df
+
+    def get_project_level_perceived_risk(self, training_raw_df, user_type):
 
         if user_type == 'all':
-            selected_raw_df = raw_df
+            selected_raw_df = training_raw_df
         elif user_type == 'experienced':
-            selected_raw_df = raw_df[raw_df['experience']=='yes']
+            selected_raw_df = training_raw_df[training_raw_df['experience']=='yes']
 
         perceived_risk_list = []
 
@@ -80,10 +82,10 @@ class RiskPerception:
 
         return perceived_risk_df
 
-    def preprocessing(self, raw_df, user_type):
+    def preprocessing(self, training_raw_df, user_type):
         print("# Preprocessing")
         # Aggregate into Project-Level Data
-        perceived_risk_df = self.get_project_level_perceived_risk(raw_df, user_type)
+        perceived_risk_df = self.get_project_level_perceived_risk(training_raw_df, user_type)
 
         # Normalize Risk Description
         perceived_risk_df = self.normalizing_risk_description(perceived_risk_df)
@@ -92,30 +94,30 @@ class RiskPerception:
 
         return perceived_risk_df
 
-    def split_data(self, perceived_risk_df, train_test_split_ratio):
-        train_df, test_df = train_test_split(perceived_risk_df, train_size=train_test_split_ratio)
+    def split_data(self, perceived_risk_df, train_validation_split_ratio):
+        train_df, validation_df = train_test_split(perceived_risk_df, train_size=train_validation_split_ratio)
 
-        return train_df, test_df
+        return train_df, validation_df
 
-    def fit_transform_models(self, train_df, test_df):
+    def fit_transform_models(self, train_df, validation_df, test_df):
         """
         # Prediction Models for Categorical Label 
         ## Model1. TF-IDF + RandomForest
         model1_params = self.config['model1_params']
 
         model1_predictor = RandomForest()
-        model1_predictor.run(train_df, test_df, model1_params)
+        model1_predictor.run(train_df, validation_df, test_df, model1_params)
 
         ## Model2. Correlation Filtering + RandomForest 
         model2_params = self.config['model2_params']
 
         model2_predictor = RandomForest()
-        model2_predictor.run(train_df, test_df, model2_params)
+        model2_predictor.run(train_df, validation_df, test_df, model2_params)
         """
         ## Model3. Correlation Filtering + Two Topic Model
         model3_params = self.config['model3_params']
         model3_predictor = TwoTopicModel()
-        model3_predictor.run(train_df, test_df, model3_params)
+        model3_predictor.run(train_df, validation_df, test_df, model3_params)
 
         # Prediction Models for Numerical Label
         ## Model4. TF-IDF + ElasticNet
@@ -127,13 +129,12 @@ class RiskPerception:
         pass
 
     def run(self):
-        raw_df = self.get_data()
+        training_raw_df, test_df = self.get_data()
 
-        perceived_risk_df = self.preprocessing(raw_df, self.user_type)
+        perceived_risk_df = self.preprocessing(training_raw_df, self.user_type)
+        train_df, validation_df = self.split_data(perceived_risk_df, self.train_validation_split_ratio)
 
-        train_df, test_df = self.split_data(perceived_risk_df, self.train_test_split_ratio)
-
-        self.fit_transform_models(train_df, test_df)
+        self.fit_transform_models(train_df, validation_df, test_df)
         pass
 
 if __name__ == '__main__':
