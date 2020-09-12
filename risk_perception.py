@@ -31,10 +31,13 @@ class RiskPerception:
         labeled_data_df.columns = ['project_id','project_title','project_short_desc','project_url','risk_desc',
                           'perceived_risk', 'experience', 'age', 'gender'] 
 
-        print("##### Raw Data Load Start #####")
+        print("##### Training Data #####")
         print(labeled_data_df.head())
 
-        prediction_df = pd.read_csv(os.path.join(self.data_dir, self.prediction_data), engine='python')
+        prediction_df = pd.read_csv(os.path.join(self.data_dir, self.prediction_data), encoding='utf-8', index_col=0)
+
+        print("##### Prediction Data #####")
+        print(prediction_df.head())
 
         return labeled_data_df, prediction_df
 
@@ -51,6 +54,7 @@ class RiskPerception:
             item_dict = {}
             item_dict['project_id'] = pid
             item_dict['risk_desc'] = sub_df['risk_desc'].iloc[0]
+            item_dict['project_address'] = sub_df['project_address'].iloc[0]
             item_dict['perceived_risk'] = sub_df['perceived_risk'].mean()
             perceived_risk_list.append(item_dict)
         
@@ -59,6 +63,12 @@ class RiskPerception:
         return perceived_risk_df
 
     def normalizing_risk_description(self, perceived_risk_df):
+        
+        print("## Before NA Text Drop: ", perceived_risk_df.shape[0])
+        perceived_risk_df.dropna(subset=['risk_desc'], inplace=True)
+        print("## After NA Text Drop: ", perceived_risk_df.shape[0])
+        perceived_risk_df['risk_desc'] = perceived_risk_df['risk_desc'].apply(str)
+
         print("## Normalizing Risk Description")
 
         text_normalizer = TextNormalizer()
@@ -82,17 +92,10 @@ class RiskPerception:
 
         return perceived_risk_df
 
-    def preprocessing(self, training_raw_df, user_type):
-        print("# Preprocessing")
-        # Aggregate into Project-Level Data
-        perceived_risk_df = self.get_project_level_perceived_risk(training_raw_df, user_type)
+    def merge_training_with_prediction_df(self, perceived_risk_df, prediction_df):
+        prediction_df = prediction_df.merge(perceived_risk_df, how='left', on='project_address')
 
-        # Normalize Risk Description
-        perceived_risk_df = self.normalizing_risk_description(perceived_risk_df)
-
-        print(perceived_risk_df.head())
-
-        return perceived_risk_df
+        return prediction_df
 
     def split_data(self, perceived_risk_df, train_test_split_ratio):
         train_df, test_df = train_test_split(perceived_risk_df, train_size=train_test_split_ratio)
@@ -129,13 +132,24 @@ class RiskPerception:
         pass
 
     def run(self):
-        labeled_data_df, prediction_df = self.get_data()
+        # Load Data
+        labeled_data_df, prediction_df = self.get_data()        
+        
+        # Aggregate into Project-Level Data
+        perceived_risk_df = self.get_project_level_perceived_risk(labeled_data_df, self.user_type)
+        
+        # Normalize Risk Description
+        perceived_risk_df = self.normalizing_risk_description(perceived_risk_df)
+        prediction_df = self.normalizing_risk_description(prediction_df)
 
-        perceived_risk_df = self.preprocessing(labeled_data_df, self.user_type)
+        # Data Gen
         train_df, test_df = self.split_data(perceived_risk_df, self.train_test_split_ratio)
-
+        prediction_df = self.merge_training_with_prediction_df(perceived_risk_df, prediction_df)
+        
+        # Training        
         self.fit_transform_models(train_df, test_df, prediction_df)
-        pass
+
+        return self
 
 if __name__ == '__main__':
 

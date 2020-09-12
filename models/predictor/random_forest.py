@@ -186,9 +186,9 @@ class RandomForest(BasePredictor):
             self.feature_importance_analysis(word_list, self.vectorizer_type)
 
         # Prediction
-        prediction = self.predict_model(test_X)
+        test_Y_hat = self.predict_model(test_X)
 
         # Evaluation
-        self.evaluation(prediction, test_Y)
+        self.evaluation(test_Y_hat, test_Y)
 
         return self

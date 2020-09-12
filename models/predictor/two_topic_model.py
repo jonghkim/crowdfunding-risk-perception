@@ -236,13 +236,13 @@ class TwoTopicModel(BasePredictor):
         word_df.to_csv('results/two_topic_score.csv')
 
         # Prediction Score Distribution
-        prediction_list = self.predict_model(test_X)
-        prediction_df = pd.DataFrame(prediction_list)
+        test_Y_hat = self.predict_model(test_X)
+        test_score_df = pd.DataFrame(test_Y_hat)
         #prediction_df = prediction_df[prediction_df[0]> 0.01]
-        prediction_df.hist(bins=100)
+        test_score_df.hist(bins=100)
         plt.savefig('results/two_topic_prediction_hist.jpg')
 
         # Evaluation
-        self.evaluation(prediction_list, test_Y)
+        self.evaluation(test_Y_hat, test_Y)
 
         return self
