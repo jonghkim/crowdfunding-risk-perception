@@ -31,6 +31,7 @@ class TwoTopicModel(BasePredictor):
 
         # predictor
         self.model_type = params['predictor']['model_type']
+        self.user_type = params['predictor']['user_type']        
         self.label_type = params['predictor']['label_type']        
 
         self.alpha_plus = params['predictor']['alpha_plus']
@@ -202,7 +203,7 @@ class TwoTopicModel(BasePredictor):
         prediction_np[prediction_np==None]=0.5
         
         # MAE Evaluation
-        acc = self.mean_absolute_error(prediction_np-0.5, test_Y)
+        acc = self.mean_absolute_error(prediction_np*4+1, test_Y*2+3)
 
         # Categorical Evaluation
         prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction_np])
@@ -234,21 +235,22 @@ class TwoTopicModel(BasePredictor):
 
         # Evaluation
         word_df = self.get_topic_df()
-        word_df.to_csv('results/two_topic_score.csv')
 
         # Prediction Score Distribution
         test_Y_hat = self.predict_model(test_X)
         test_score_df = pd.DataFrame(test_Y_hat)
         #prediction_df = prediction_df[prediction_df[0]> 0.01]
         test_score_df.hist(bins=100)
-        plt.savefig('results/two_topic_prediction_hist.jpg')
 
         # Evaluation
-        acc = self.evaluation(test_Y_hat, test_Y)
+        mae = self.evaluation(test_Y_hat, test_Y)
+        word_df.to_csv('results/two_topic_score_usr_type_{}_alpha_{}_mae_{:.2f}.csv'.format(self.user_type, self.alpha_plus, mae))
+        plt.savefig('results/two_topic_prediction_hist_usr_type_{}_alpha_{}_mae_{:.2f}.jpg'.format(self.user_type, self.alpha_plus, mae))
 
         # Prediction
         prediction_Y_hat = self.predict_model(prediction_X)
-        prediction_df['prediction'] = prediction_Y_hat
-        prediction_df.to_csv('../results/model_{}_alpha_{}_acc_{"%.2f"}.csv'.format('two_topic_model', self.alpha_plus, acc))
+        
+        prediction_df['prediction'] = [val*4+1 if val != None else None for val in prediction_Y_hat]
+        prediction_df.to_csv('results/model_{}_usr_type_{}_alpha_{}_mae_{:.2f}.csv'.format('two_topic_model', self.user_type, self.alpha_plus, mae))
 
         return self

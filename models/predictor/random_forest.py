@@ -31,6 +31,7 @@ class RandomForest(BasePredictor):
 
         # predictor
         self.model_type = params['predictor']['model_type']
+        self.user_type = params['predictor']['user_type']
         self.label_type = params['predictor']['label_type']        
         self.param_grid = params['predictor']['param_grid']
         self.k_fold_cv = params['predictor']['k_fold_cv']
@@ -98,7 +99,7 @@ class RandomForest(BasePredictor):
 
         return self
 
-    def feature_importance_analysis(self, word_list, vectorizer_type):
+    def feature_importance_analysis(self, word_list, vectorizer_type, acc):
         # Get numerical feature importances
         importances = list(self.prediction_model.feature_importances_)
         # List of tuples with variable and importance
@@ -124,7 +125,7 @@ class RandomForest(BasePredictor):
         plt.ylabel('Importance')
         plt.xlabel('Variable')
         plt.title('Variable Importances')
-        plt.savefig('results/rf_{}.jpg'.format(vectorizer_type))
+        plt.savefig('results/rf_{}_usr_type_{}_acc_{:.2f}.jpg'.format(vectorizer_type,  self.user_type, acc))
 
         #### text - cumulative importance ####
         plt.figure()        
@@ -143,7 +144,7 @@ class RandomForest(BasePredictor):
         plt.xlabel('Variable')
         plt.ylabel('Cumulative Importance')
         plt.title('Cumulative Importances')
-        plt.savefig('results/rf_cumulative_{}.jpg'.format(vectorizer_type))
+        plt.savefig('results/rf_cumulative_{}_usr_type_{}_acc_{:.2f}.csv'.format(self.vectorizer_type, self.user_type, acc))
 
         return self
 
@@ -184,16 +185,16 @@ class RandomForest(BasePredictor):
         # Fit Model
         self.fit_model(train_X, train_Y, self.param_grid, self.k_fold_cv)
 
-        if self.plot_feature_importance == True:
-            self.feature_importance_analysis(word_list, self.vectorizer_type)
-
         # Evaluation
         test_Y_hat = self.predict_model(test_X)
         acc = self.evaluation(test_Y_hat, test_Y)
 
+        if self.plot_feature_importance == True:
+            self.feature_importance_analysis(word_list, self.vectorizer_type, acc)
+
         # Prediction
         prediction_Y_hat = self.predict_model(prediction_X)
         prediction_df['prediction'] = prediction_Y_hat
-        prediction_df.to_csv('../results/model_{}_acc_{"%.2f"}.csv'.format('random_forest_{}'.format(self.vectorizer_type), acc))
+        prediction_df.to_csv('results/model_{}_usr_type_{}_acc_{:.2f}.csv'.format('random_forest_{}'.format(self.vectorizer_type), self.user_type, acc))
         
         return self

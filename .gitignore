@@ -12,3 +12,4 @@ notebook/geckodriver
 notebook/geckodriver.log
 notebook/html/*
 notebook/backup/*
+notebook/data_gen.ipynb

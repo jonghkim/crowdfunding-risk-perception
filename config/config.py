@@ -18,6 +18,7 @@ def get_config():
     # Model1. RandomForest with TF-IDF
     params['model1_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
                                'predictor': {'model_type': 'random_forest',
+                                             'user_type': params['user_type'],
                                              'label_type': 'categorical_type1', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'param_grid': {
@@ -36,6 +37,7 @@ def get_config():
                                              'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.01}, # kappa: words frequency filter
                                'predictor': {'model_type': 'random_forest',
+                                             'user_type': params['user_type'],
                                              'label_type': 'categorical_type1', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'param_grid': {
@@ -53,9 +55,10 @@ def get_config():
     params['model3_params'] = {'vectorizer': {'min_df': 10, 'max_features': 3000
                                              },
                                 'predictor': {'model_type': 'two_topic_model', 
+                                              'user_type': params['user_type'],
                                              'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
-                                             'alpha_plus':0.25, # high risk words
-                                             'alpha_minus':0.25, # low risk words
+                                             'alpha_plus':0.2, # high risk words
+                                             'alpha_minus':0.2, # low risk words
                                              'kappa':0.01, # min doc filter
                                              'lamb':1}  #lamb: beta priori penalty
                                }

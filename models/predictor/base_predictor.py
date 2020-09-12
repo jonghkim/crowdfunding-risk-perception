@@ -36,9 +36,11 @@ class BasePredictor:
 
     @classmethod
     def mean_absolute_error(self, prediction, true_label):
+        mae = mean_absolute_error(true_label, prediction)
+
         print("#### Mean Absoulte Error ####")
-        print(mean_absolute_error(true_label, prediction))  
-        return self
+        print(mae)  
+        return mae
     
     @classmethod
     def get_confusion_matrix(self, prediction, true_label):
@@ -54,6 +56,7 @@ class BasePredictor:
 
     @classmethod
     def get_accuracy_score(self, prediction, true_label):
+        acc = accuracy_score(prediction, true_label)
         print("#### Accuracy Score ####")
-        print(accuracy_score(prediction, true_label))
-        return self
+        print(acc)
+        return acc

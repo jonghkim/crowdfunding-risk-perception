@@ -27,9 +27,9 @@ class RiskPerception:
         self.train_test_split_ratio = self.config['train_test_split_ratio']
     
     def get_data(self):        
-        labeled_data_df = pd.read_csv(os.path.join(self.data_dir, self.labeled_data), engine='python')
+        labeled_data_df = pd.read_csv(os.path.join(self.data_dir, self.labeled_data), engine='python', index_col=0)
         labeled_data_df.columns = ['project_id','project_title','project_short_desc','project_url','risk_desc',
-                          'perceived_risk', 'experience', 'age', 'gender'] 
+                                    'perceived_risk', 'experience', 'age', 'gender', 'project_address'] 
 
         print("##### Training Data #####")
         print(labeled_data_df.head())
@@ -93,7 +93,7 @@ class RiskPerception:
         return perceived_risk_df
 
     def merge_training_with_prediction_df(self, perceived_risk_df, prediction_df):
-        prediction_df = prediction_df.merge(perceived_risk_df, how='left', on='project_address')
+        prediction_df = prediction_df.merge(perceived_risk_df[['project_address', 'perceived_risk']], how='left', on='project_address')
 
         return prediction_df
 
