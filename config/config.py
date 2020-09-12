@@ -6,12 +6,12 @@ def get_config():
     ##### Data #####
     params['data_dir'] = 'data'
 
-    params['training_data'] = 'training_data.csv'
-    params['test_data'] = 'test_data.csv'
+    params['labeled_data'] = 'labeled_data.csv'
+    params['prediction_data'] = 'prediction_data.csv'
     
     ##### Preprocessing #####
     params['user_type'] = 'all' # all, experienced
-    params['train_validation_split_ratio'] = 0.7
+    params['train_test_split_ratio'] = 0.7
 
     ##### Models #####
     ## Prediction Models for Categorical Label

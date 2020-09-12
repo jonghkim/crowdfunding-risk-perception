@@ -19,35 +19,35 @@ class RiskPerception:
 
         ##### Data #####
         self.data_dir = self.config['data_dir']
-        self.training_data = self.config['training_data']
-        self.test_data = self.config['test_data']
+        self.labeled_data = self.config['labeled_data']
+        self.prediction_data = self.config['prediction_data']
 
         ##### Preprocessing #####
         self.user_type = self.config['user_type']
-        self.train_validation_split_ratio = self.config['train_validation_split_ratio']
+        self.train_test_split_ratio = self.config['train_test_split_ratio']
     
     def get_data(self):        
-        training_raw_df = pd.read_csv(os.path.join(self.data_dir, self.training_data), engine='python')
-        training_raw_df.columns = ['project_id','project_title','project_short_desc','project_url','risk_desc',
+        labeled_data_df = pd.read_csv(os.path.join(self.data_dir, self.labeled_data), engine='python')
+        labeled_data_df.columns = ['project_id','project_title','project_short_desc','project_url','risk_desc',
                           'perceived_risk', 'experience', 'age', 'gender'] 
 
         print("##### Raw Data Load Start #####")
-        print(training_raw_df.head())
+        print(labeled_data_df.head())
 
-        test_raw_df = pd.read_csv(os.path.join(self.data_dir, self.test_data), engine='python')
+        prediction_df = pd.read_csv(os.path.join(self.data_dir, self.prediction_data), engine='python')
 
-        return training_raw_df, test_raw_df
+        return labeled_data_df, prediction_df
 
-    def get_project_level_perceived_risk(self, training_raw_df, user_type):
+    def get_project_level_perceived_risk(self, labeled_data_df, user_type):
 
         if user_type == 'all':
-            selected_raw_df = training_raw_df
+            selected_df = labeled_data_df
         elif user_type == 'experienced':
-            selected_raw_df = training_raw_df[training_raw_df['experience']=='yes']
+            selected_df = labeled_data_df[labeled_data_df['experience']=='yes']
 
         perceived_risk_list = []
 
-        for pid, sub_df in selected_raw_df.groupby('project_id'):
+        for pid, sub_df in selected_df.groupby('project_id'):
             item_dict = {}
             item_dict['project_id'] = pid
             item_dict['risk_desc'] = sub_df['risk_desc'].iloc[0]
@@ -94,30 +94,30 @@ class RiskPerception:
 
         return perceived_risk_df
 
-    def split_data(self, perceived_risk_df, train_validation_split_ratio):
-        train_df, validation_df = train_test_split(perceived_risk_df, train_size=train_validation_split_ratio)
+    def split_data(self, perceived_risk_df, train_test_split_ratio):
+        train_df, test_df = train_test_split(perceived_risk_df, train_size=train_test_split_ratio)
 
-        return train_df, validation_df
+        return train_df, test_df
 
-    def fit_transform_models(self, train_df, validation_df, test_df):
+    def fit_transform_models(self, train_df, test_df, prediction_df):
         """
         # Prediction Models for Categorical Label 
         ## Model1. TF-IDF + RandomForest
         model1_params = self.config['model1_params']
 
         model1_predictor = RandomForest()
-        model1_predictor.run(train_df, validation_df, test_df, model1_params)
+        model1_predictor.run(train_df, test_df, prediction_df, model1_params)
 
         ## Model2. Correlation Filtering + RandomForest 
         model2_params = self.config['model2_params']
 
         model2_predictor = RandomForest()
-        model2_predictor.run(train_df, validation_df, test_df, model2_params)
+        model2_predictor.run(train_df, test_df, prediction_df, model2_params)
         """
         ## Model3. Correlation Filtering + Two Topic Model
         model3_params = self.config['model3_params']
         model3_predictor = TwoTopicModel()
-        model3_predictor.run(train_df, validation_df, test_df, model3_params)
+        model3_predictor.run(train_df, test_df, prediction_df, model3_params)
 
         # Prediction Models for Numerical Label
         ## Model4. TF-IDF + ElasticNet
@@ -129,12 +129,12 @@ class RiskPerception:
         pass
 
     def run(self):
-        training_raw_df, test_df = self.get_data()
+        labeled_data_df, prediction_df = self.get_data()
 
-        perceived_risk_df = self.preprocessing(training_raw_df, self.user_type)
-        train_df, validation_df = self.split_data(perceived_risk_df, self.train_validation_split_ratio)
+        perceived_risk_df = self.preprocessing(labeled_data_df, self.user_type)
+        train_df, test_df = self.split_data(perceived_risk_df, self.train_test_split_ratio)
 
-        self.fit_transform_models(train_df, validation_df, test_df)
+        self.fit_transform_models(train_df, test_df, prediction_df)
         pass
 
 if __name__ == '__main__':
