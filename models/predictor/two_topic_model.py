@@ -6,6 +6,7 @@ import os
 
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import KFold
 
 from models.predictor.base_predictor import BasePredictor
 from models.pipeline.label_generator.label_generator import LabelGenerator
@@ -33,17 +34,18 @@ class TwoTopicModel(BasePredictor):
         self.model_type = params['predictor']['model_type']
         self.user_type = params['predictor']['user_type']        
         self.label_type = params['predictor']['label_type']        
+        self.k_fold_cv = params['predictor']['k_fold_cv']        
 
-        self.alpha_plus = params['predictor']['alpha_plus']
-        self.alpha_minus = params['predictor']['alpha_minus']
-        self.kappa = params['predictor']['kappa']
-        self.lamb = params['predictor']['lamb']
+        self.alpha_plus = params['predictor']['hyperparams']['alpha_plus']
+        self.alpha_minus = params['predictor']['hyperparams']['alpha_minus']
+        self.kappa = params['predictor']['hyperparams']['kappa']
+        self.lamb = params['predictor']['hyperparams']['lamb']
 
         return self        
 
-    def get_label(self, df, label_type):
+    def get_label(self, df):
         label_generator = LabelGenerator()
-        label = label_generator.get_label(df['perceived_risk'].tolist(), label_type)
+        label = label_generator.get_label(df['perceived_risk'].tolist(), 'numerical')
         label = np.array(label)
         
         return label
@@ -67,15 +69,19 @@ class TwoTopicModel(BasePredictor):
 
         return X
     
-    def transform_vectorizer(self, df):
-        X = self.vectorizer.transform(df['risk_desc'].tolist())
+    def transform_vectorizer(self, text_list):
+        X = self.vectorizer.transform(text_list)
         X = X.toarray()
         
         return X 
 
-    def sreen_sentiment_charged_words(self, X, y, alpha_plus, alpha_minus, kappa):
+    def sreen_sentiment_charged_words(self, X, y, alpha_plus, alpha_minus, kappa, label_type):
         X_binary = np.where(X > 0, 1, 0)
-        y_binary = np.where(y > 0, 1, 0).reshape(-1,1)    
+
+        if label_type == 'categorical_type1':
+            y_binary = np.where(y > 0, 1, 0).reshape(-1,1)    
+        elif label_type == 'categorical_type2':
+            y_binary = np.where(y >= 0, 1, 0).reshape(-1,1)    
 
         k = np.sum(X_binary, axis=0)
         f = np.sum(X_binary * y_binary, axis=0) / k
@@ -162,8 +168,30 @@ class TwoTopicModel(BasePredictor):
 
         return p_hat['x'][0]
 
-    def fit_model(self, X, y, alpha_plus=0.25, alpha_minus=0.25, kappa=0.01):
-        S_hat, S_plus, S_minus = self.sreen_sentiment_charged_words(X, y, alpha_plus, alpha_minus, kappa)
+    def evaluate_model(self, X, Y, k_fold_cv):
+        # k fold validation
+        kf = KFold(n_splits=k_fold_cv)
+
+        score_list = []
+
+        for train_index, test_index in kf.split(X):
+            train_X, test_X = X[train_index], X[test_index]
+            train_Y, test_Y = Y[train_index], Y[test_index]
+
+            self.fit_model(train_X, train_Y, self.alpha_plus, self.alpha_minus, self.kappa, self.label_type)
+
+            test_Y_hat = self.predict_model(test_X)
+            mae = self.evaluation(test_Y_hat, test_Y)           
+            score_list.append(mae)
+
+        print("Average MAE: ", np.mean(score_list))
+
+        return np.mean(score_list)
+
+    def fit_model(self, X, y, alpha_plus=0.25, alpha_minus=0.25, kappa=0.01, label_type='categorical_type1'):
+        print("# Two Topic Model Fit Model")
+        
+        S_hat, S_plus, S_minus = self.sreen_sentiment_charged_words(X, y, alpha_plus, alpha_minus, kappa, label_type)
         O_hat = self.estimate_two_topic(y, X, S_hat)
         
         self.S_hat, self.O_hat = S_hat, O_hat
@@ -203,7 +231,7 @@ class TwoTopicModel(BasePredictor):
         prediction_np[prediction_np==None]=0.5
         
         # MAE Evaluation
-        acc = self.mean_absolute_error(prediction_np*4+1, test_Y*2+3)
+        mae = self.mean_absolute_error(prediction_np*4+1, test_Y*2+3)
 
         # Categorical Evaluation
         prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction_np])
@@ -213,39 +241,30 @@ class TwoTopicModel(BasePredictor):
         self.get_classification_report(prediction_category, test_Y_category)
         self.get_accuracy_score(prediction_category, test_Y_category)
         
-        return acc        
+        return mae        
 
-    def run(self, train_df, test_df, prediction_df, params):
+    def run(self, perceived_risk_df, prediction_df, params):
         
         # Set Config
         self.set_config(params)
 
         # Get Label
-        train_Y = self.get_label(train_df, self.label_type)
-        test_Y = self.get_label(test_df, self.label_type)
-
+        Y = self.get_label(perceived_risk_df)
         # Train Model
-        X = self.fit_vectorizer(train_df)
+        X = self.fit_vectorizer(perceived_risk_df)
 
-        self.fit_model(X, train_Y, self.alpha_plus, self.alpha_minus, self.kappa)
+        # evaluate_model
+        mae = self.evaluate_model(X, Y, self.k_fold_cv)
 
-        # Predict
-        test_X = self.transform_vectorizer(test_df)
-        prediction_X = self.transform_vectorizer(prediction_df)
+        # Train Final Model
+        self.fit_model(X, Y, self.alpha_plus, self.alpha_minus, self.kappa, self.label_type)
 
-        # Evaluation
+        # Two Topic Save
         word_df = self.get_topic_df()
-
-        # Prediction Score Distribution
-        test_Y_hat = self.predict_model(test_X)
-        test_score_df = pd.DataFrame(test_Y_hat)
-        #prediction_df = prediction_df[prediction_df[0]> 0.01]
-        test_score_df.hist(bins=100)
-
-        # Evaluation
-        mae = self.evaluation(test_Y_hat, test_Y)
         word_df.to_csv('results/two_topic_score_usr_type_{}_alpha_{}_mae_{:.2f}.csv'.format(self.user_type, self.alpha_plus, mae))
-        plt.savefig('results/two_topic_prediction_hist_usr_type_{}_alpha_{}_mae_{:.2f}.jpg'.format(self.user_type, self.alpha_plus, mae))
+
+        # Vectorizer
+        prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist())
 
         # Prediction
         prediction_Y_hat = self.predict_model(prediction_X)
