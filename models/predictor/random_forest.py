@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 from models.predictor.base_predictor import BasePredictor
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_validate
 
 from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
 from models.vectorizer.vectorizer_correlation_filtering import VectorizerCorrelationFiltering
@@ -33,7 +33,7 @@ class RandomForest(BasePredictor):
         self.model_type = params['predictor']['model_type']
         self.user_type = params['predictor']['user_type']
         self.label_type = params['predictor']['label_type']        
-        self.param_grid = params['predictor']['param_grid']
+        self.hyperparams = params['predictor']['hyperparams']
         self.k_fold_cv = params['predictor']['k_fold_cv']
 
         self.plot_feature_importance = params['predictor']['plot_feature_importance']
@@ -85,17 +85,29 @@ class RandomForest(BasePredictor):
 
         return label
 
-    def fit_model(self, train_X, train_Y, param_grid, k_fold_cv):
-        self.prediction_model = RandomForestClassifier() 
+    def evaluate_model(self, X, Y, hyperparams, k_fold_cv):
+        evaluation_model = RandomForestClassifier(**hyperparams) 
 
-        grid_search = GridSearchCV(estimator = self.prediction_model, param_grid = param_grid, 
-                                cv = k_fold_cv, n_jobs = -1, verbose = 2)
-        grid_search.fit(train_X, train_Y)
+        scoring = {'acc': 'accuracy',
+                   'prec': 'precision_macro',
+                   'rec': 'recall_macro'}
+                
+        scores = cross_validate(evaluation_model, X, Y, scoring=scoring)
 
-        print("#### Best Grid Search Output ####")
-        print(grid_search.best_params_)
+        # Test Set Score
+        print("Train Set - Mean Acc: ", np.mean(scores['train_acc']))
+        print("Train Set - Mean Precision: ", np.mean(scores['train_prec']))
+        print("Train Set - Mean Recall: ", np.mean(scores['train_rec']))
+        
+        print("Test Set - Mean Acc: ", np.mean(scores['test_acc']))
+        print("Test Set - Mean Precision: ", np.mean(scores['test_prec']))
+        print("Test Set - Mean Recall: ", np.mean(scores['test_rec']))
 
-        self.prediction_model = grid_search.best_estimator_
+        return np.mean(scores['test_acc'])
+
+    def fit_model(self, X, Y, hyperparams):
+        self.prediction_model = RandomForestClassifier(**hyperparams)
+        self.prediction_model.fit(X, Y)
 
         return self
 
@@ -153,45 +165,31 @@ class RandomForest(BasePredictor):
         
         return prediction
 
-    def evaluation(self, prediction, test_Y):
-        print("### Model - Random Forest ###")
-        print("#### Setting: ", self.config)
-
-        self.get_confusion_matrix(prediction, test_Y)
-        self.get_classification_report(prediction, test_Y)
-        acc = self.get_accuracy_score(prediction, test_Y)
-        
-        return acc
-
-    def run(self, train_df, test_df, prediction_df, params):
+    def run(self, perceived_risk_df, prediction_df, params):
         
         # Set Config
         self.set_config(params)
 
         # Get Label
-        train_Y = self.get_label(train_df, self.label_type)
-        test_Y = self.get_label(test_df, self.label_type)
+        Y = self.get_label(perceived_risk_df, self.label_type)
         
         # Get Features
         if self.vectorizer_type == 'tf_idf':
-            train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type)
-            test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
+            X, word_list = self.fit_vectorizer(perceived_risk_df['risk_desc'].tolist(), self.vectorizer_type)
             prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
         elif self.vectorizer_type == 'correlation_filtering':
-            train_X, word_list = self.fit_vectorizer(train_df['risk_desc'].tolist(), self.vectorizer_type, train_Y)
-            test_X = self.transform_vectorizer(test_df['risk_desc'].tolist(), self.vectorizer_type)
+            X, word_list = self.fit_vectorizer(perceived_risk_df['risk_desc'].tolist(), self.vectorizer_type, Y)
             prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
 
-        # Fit Model
-        self.fit_model(train_X, train_Y, self.param_grid, self.k_fold_cv)
+        # Evaluation Model
+        acc = self.evaluate_model(X, Y, self.hyperparams, self.k_fold_cv)
 
-        # Evaluation
-        test_Y_hat = self.predict_model(test_X)
-        acc = self.evaluation(test_Y_hat, test_Y)
+        # Train Final Model
+        self.fit_model(X, Y, self.hyperparams)
 
         if self.plot_feature_importance == True:
             self.feature_importance_analysis(word_list, self.vectorizer_type, acc)
-
+        
         # Prediction
         prediction_Y_hat = self.predict_model(prediction_X)
         prediction_df['prediction'] = prediction_Y_hat

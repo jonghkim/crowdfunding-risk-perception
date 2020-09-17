@@ -24,7 +24,6 @@ class RiskPerception:
 
         ##### Preprocessing #####
         self.user_type = self.config['user_type']
-        self.train_test_split_ratio = self.config['train_test_split_ratio']
     
     def get_data(self):        
         labeled_data_df = pd.read_csv(os.path.join(self.data_dir, self.labeled_data), engine='python', index_col=0)
@@ -97,30 +96,26 @@ class RiskPerception:
 
         return prediction_df
 
-    def split_data(self, perceived_risk_df, train_test_split_ratio):
-        train_df, test_df = train_test_split(perceived_risk_df, train_size=train_test_split_ratio)
-
-        return train_df, test_df
-
-    def fit_transform_models(self, train_df, test_df, prediction_df):
+    def fit_transform_models(self, perceived_risk_df, prediction_df):
         
         # Prediction Models for Categorical Label 
         ## Model1. TF-IDF + RandomForest
         model1_params = self.config['model1_params']
 
         model1_predictor = RandomForest()
-        model1_predictor.run(train_df, test_df, prediction_df, model1_params)
+        model1_predictor.run(perceived_risk_df, prediction_df, model1_params)
 
         ## Model2. Correlation Filtering + RandomForest 
         model2_params = self.config['model2_params']
 
         model2_predictor = RandomForest()
-        model2_predictor.run(train_df, test_df, prediction_df, model2_params)
+        model2_predictor.run(perceived_risk_df, prediction_df, model2_params)
         
+        """
         ## Model3. Correlation Filtering + Two Topic Model
         model3_params = self.config['model3_params']
         model3_predictor = TwoTopicModel()
-        model3_predictor.run(train_df, test_df, prediction_df, model3_params)
+        model3_predictor.run(perceived_risk_df, prediction_df, model3_params)
         
         # Prediction Models for Numerical Label
         ## Model4. TF-IDF + ElasticNet
@@ -128,6 +123,7 @@ class RiskPerception:
 
         ## Model5. Correlation Filtering + ElasticNet        
         model5_params = self.config['model5_params']
+        """
 
         pass
 
@@ -142,12 +138,11 @@ class RiskPerception:
         perceived_risk_df = self.normalizing_risk_description(perceived_risk_df)
         prediction_df = self.normalizing_risk_description(prediction_df)
 
-        # Data Gen
-        train_df, test_df = self.split_data(perceived_risk_df, self.train_test_split_ratio)
+        # Merge Label Info
         prediction_df = self.merge_training_with_prediction_df(perceived_risk_df, prediction_df)
         
         # Training        
-        self.fit_transform_models(train_df, test_df, prediction_df)
+        self.fit_transform_models(perceived_risk_df, prediction_df)
 
         return self
 

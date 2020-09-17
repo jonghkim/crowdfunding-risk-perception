@@ -11,7 +11,6 @@ def get_config():
     
     ##### Preprocessing #####
     params['user_type'] = 'experienced' # all, experienced
-    params['train_test_split_ratio'] = 0.7
 
     ##### Models #####
     ## Prediction Models for Categorical Label
@@ -21,13 +20,13 @@ def get_config():
                                              'user_type': params['user_type'],
                                              'label_type': 'categorical_type1', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
-                                             'param_grid': {
-                                                            'bootstrap': [True],
-                                                            'max_depth': [None], #10, 50, None
-                                                            'max_features': ['log2', 'sqrt'],
-                                                            'min_samples_leaf': [1], #1, 3, 5
-                                                            'min_samples_split': [4], #2, 5, 10
-                                                            'n_estimators': [1000]
+                                             'hyperparams': {
+                                                            'bootstrap': True,
+                                                            'max_depth': None, #10, 50, None
+                                                            'max_features': 'log2',
+                                                            'min_samples_leaf': 1, #1, 3, 5
+                                                            'min_samples_split': 2, #2, 5, 10
+                                                            'n_estimators': 1000
                                                            },
                                             'plot_feature_importance':False}
                               }
@@ -40,13 +39,13 @@ def get_config():
                                              'user_type': params['user_type'],
                                              'label_type': 'categorical_type1', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
-                                             'param_grid': {
-                                                            'bootstrap': [True],
-                                                            'max_depth': [None], #10, 50, None
-                                                            'max_features': ['log2', 'sqrt'],
-                                                            'min_samples_leaf': [1], #1, 3, 5
-                                                            'min_samples_split': [4], #2, 5, 10
-                                                            'n_estimators': [1000]
+                                             'hyperparams': {
+                                                            'bootstrap': True,
+                                                            'max_depth': None, #10, 50, None
+                                                            'max_features': 'log2',
+                                                            'min_samples_leaf': 1, #1, 3, 5
+                                                            'min_samples_split': 2, #2, 5, 10
+                                                            'n_estimators': 1000
                                                            },
                                              'plot_feature_importance':True}
                               }
@@ -56,11 +55,14 @@ def get_config():
                                              },
                                 'predictor': {'model_type': 'two_topic_model', 
                                               'user_type': params['user_type'],
-                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
-                                             'alpha_plus':0.2, # high risk words
-                                             'alpha_minus':0.2, # low risk words
-                                             'kappa':0.01, # min doc filter
-                                             'lamb':1}  #lamb: beta priori penalty
+                                              'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                              'k_fold_cv':5,                                             
+                                              'hyperparams':{
+                                                            'alpha_plus':0.2, # high risk words
+                                                            'alpha_minus':0.2, # low risk words
+                                                            'kappa':0.01, # min doc filter
+                                                            'lamb':1}  #lamb: beta priori penalty
+                                              }
                                }
     ## Prediction Models for Numerical Label
     # Model4. ElasticNet with TF-IDF
