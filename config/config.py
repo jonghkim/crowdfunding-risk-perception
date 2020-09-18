@@ -105,7 +105,7 @@ def get_config():
     params['model6_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
                                'predictor': {'model_type': 'elastic_net',
                                              'user_type': params['user_type'],
-                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'label_type': 'numerical_type2', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'hyperparams': {'alpha':1.0, 'l1_ratio':0.5, 'fit_intercept':True, 
                                                             'normalize':False, 'precompute':False, 
@@ -122,7 +122,7 @@ def get_config():
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'elastic_net',
                                              'user_type': params['user_type'],
-                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'label_type': 'numerical_type2', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'hyperparams': {'alpha':1.0, 'l1_ratio':0.5, 'fit_intercept':True, 
                                                             'normalize':False, 'precompute':False, 
