@@ -19,7 +19,7 @@ class VectorizerCorrelationFiltering:
         return train_X, word_list, vectorizer
         
     # Correlation Filtering
-    def correlation_filtering(self, X, y, alpha, kappa):
+    def corr_filter(self, X, y, alpha, kappa):
         X_binary = np.where(X > 0, 1, 0)
         y_binary = np.where(y > 0, 1, 0).reshape(-1,1)    
 
@@ -53,7 +53,7 @@ class VectorizerCorrelationFiltering:
 
     def fit_transform(self, risk_desc_list, label, min_df=10, max_features=1000, alpha=0.1, kappa=0.01):
         train_X, word_list, vectorizer = self.count_vectorizer(risk_desc_list, min_df, max_features)
-        S_hat, S_plus, S_minus = self.correlation_filtering(train_X, label, alpha, kappa)
+        S_hat, S_plus, S_minus = self.corr_filter(train_X, label, alpha, kappa)
 
         train_D_S = train_X[:, S_hat]
         plus_word_list = [word_list[index] for index in S_plus]

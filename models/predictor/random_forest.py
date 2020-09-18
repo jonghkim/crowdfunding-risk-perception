@@ -25,7 +25,7 @@ class RandomForest(BasePredictor):
         self.min_df = params['vectorizer']['min_df']
         self.max_features = params['vectorizer']['max_features']
 
-        if self.vectorizer_type == 'correlation_filtering':
+        if self.vectorizer_type == 'corr_filter':
             self.alpha = params['vectorizer']['alpha']     
             self.kappa = params['vectorizer']['kappa']     
 
@@ -47,7 +47,7 @@ class RandomForest(BasePredictor):
             
             print("   Size of Words",len(word_list))
 
-        elif vectorizer_type == 'correlation_filtering':
+        elif vectorizer_type == 'corr_filter':
             corr_filtering_vectorizer = VectorizerCorrelationFiltering()
             train_X, plus_word_list, minus_word_list, self.vectorizer, self.S_hat = corr_filtering_vectorizer.fit_transform(risk_desc_list, label, 
                                                                                     self.min_df, self.max_features, self.alpha, self.kappa)
@@ -71,7 +71,7 @@ class RandomForest(BasePredictor):
             test_X = self.vectorizer.transform(risk_desc_list)
             test_X = test_X.toarray()
             
-        elif vectorizer_type == 'correlation_filtering':
+        elif vectorizer_type == 'corr_filter':
             test_X = self.vectorizer.transform(risk_desc_list)
             test_X = test_X.toarray()         
             test_X = test_X[:, self.S_hat]             
@@ -137,7 +137,7 @@ class RandomForest(BasePredictor):
         plt.ylabel('Importance')
         plt.xlabel('Variable')
         plt.title('Variable Importances')
-        plt.savefig('results/rf_{}_usr_type_{}_acc_{:.2f}.jpg'.format(vectorizer_type,  self.user_type, acc))
+        plt.savefig('results/rf_{}_{}_usr_type_{}_acc_{:.2f}.jpg'.format(vectorizer_type, self.label_type, self.user_type, acc))
 
         #### text - cumulative importance ####
         plt.figure()        
@@ -156,7 +156,7 @@ class RandomForest(BasePredictor):
         plt.xlabel('Variable')
         plt.ylabel('Cumulative Importance')
         plt.title('Cumulative Importances')
-        plt.savefig('results/rf_cumulative_{}_usr_type_{}_acc_{:.2f}.jpg'.format(self.vectorizer_type, self.user_type, acc))
+        plt.savefig('results/rf_cumulative_{}_{}_usr_type_{}_acc_{:.2f}.jpg'.format(self.vectorizer_type, self.label_type, self.user_type, acc))
 
         return self
 
@@ -177,7 +177,7 @@ class RandomForest(BasePredictor):
         if self.vectorizer_type == 'tf_idf':
             X, word_list = self.fit_vectorizer(perceived_risk_df['risk_desc'].tolist(), self.vectorizer_type)
             prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
-        elif self.vectorizer_type == 'correlation_filtering':
+        elif self.vectorizer_type == 'corr_filter':
             X, word_list = self.fit_vectorizer(perceived_risk_df['risk_desc'].tolist(), self.vectorizer_type, Y)
             prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
 
@@ -193,6 +193,10 @@ class RandomForest(BasePredictor):
         # Prediction
         prediction_Y_hat = self.predict_model(prediction_X)
         prediction_df['prediction'] = prediction_Y_hat
-        prediction_df.to_csv('results/model_{}_usr_type_{}_acc_{:.2f}.csv'.format('random_forest_{}'.format(self.vectorizer_type), self.user_type, acc))
+
+        if self.vectorizer_type == 'tf_idf':
+            prediction_df.to_csv('results/{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('rf_{}'.format(self.vectorizer_type), self.label_type, self.user_type, acc))
+        elif self.vectorizer_type == 'corr_filter':
+            prediction_df.to_csv('results/{}_alpha_{}_kappa_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('rf_{}'.format(self.vectorizer_type), self.alpha, self.kappa, self.label_type, self.user_type, acc))
         
         return self

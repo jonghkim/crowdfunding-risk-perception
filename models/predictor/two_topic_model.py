@@ -7,6 +7,7 @@ import os
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import KFold
+from sklearn.metrics import r2_score, precision_score, recall_score, accuracy_score
 
 from models.predictor.base_predictor import BasePredictor
 from models.pipeline.label_generator.label_generator import LabelGenerator
@@ -172,7 +173,7 @@ class TwoTopicModel(BasePredictor):
         # k fold validation
         kf = KFold(n_splits=k_fold_cv)
 
-        score_list = []
+        scores_list = []
 
         for train_index, test_index in kf.split(X):
             train_X, test_X = X[train_index], X[test_index]
@@ -181,12 +182,14 @@ class TwoTopicModel(BasePredictor):
             self.fit_model(train_X, train_Y, self.alpha_plus, self.alpha_minus, self.kappa, self.label_type)
 
             test_Y_hat = self.predict_model(test_X)
-            mae = self.evaluation(test_Y_hat, test_Y)           
-            score_list.append(mae)
+            scores = self.evaluation(test_Y_hat, test_Y)           
+            scores_list.append(scores)
 
-        print("Average MAE: ", np.mean(score_list))
+        scores_df = pd.DataFrame(scores_list)
 
-        return np.mean(score_list)
+        print("Average Scores: ", scores_df.mean())
+
+        return scores_df.mean()
 
     def fit_model(self, X, y, alpha_plus=0.25, alpha_minus=0.25, kappa=0.01, label_type='categorical_type1'):
         print("# Two Topic Model Fit Model")
@@ -224,24 +227,32 @@ class TwoTopicModel(BasePredictor):
         return topic_df
 
     def evaluation(self, prediction_list, test_Y):
+
+        scores = {}
+        
         print("### Model - Two Topic Model ###")
         print("#### Setting: ", self.config)
-
+    
         prediction_np = np.array(prediction_list)
         prediction_np[prediction_np==None]=0.5
         
-        # MAE Evaluation
-        mae = self.mean_absolute_error(prediction_np*4+1, test_Y*2+3)
+        # Continuous Value Evaluation
+        ## MAE Evaluation
+        scores['mae'] = self.mean_absolute_error(prediction_np*4+1, test_Y*2+3)
+        ## R^2 Evaluation
+        scores['r_2'] = r2_score(test_Y*2+3, prediction_np*4+1)
 
         # Categorical Evaluation
         prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction_np])
         test_Y_category = np.array([1 if score > 0 else 0 for score in test_Y])
 
-        self.get_confusion_matrix(prediction_category, test_Y_category)
-        self.get_classification_report(prediction_category, test_Y_category)
-        self.get_accuracy_score(prediction_category, test_Y_category)
-        
-        return mae        
+        scores['acc'] = accuracy_score(prediction_category, test_Y_category)
+        scores['precision'] = precision_score(test_Y_category, prediction_category, average='micro')
+        scores['recall'] = recall_score(test_Y_category, prediction_category, average='micro')
+
+        print(scores)
+
+        return scores        
 
     def run(self, perceived_risk_df, prediction_df, params):
         
@@ -254,14 +265,14 @@ class TwoTopicModel(BasePredictor):
         X = self.fit_vectorizer(perceived_risk_df)
 
         # evaluate_model
-        mae = self.evaluate_model(X, Y, self.k_fold_cv)
+        scores = self.evaluate_model(X, Y, self.k_fold_cv)
 
         # Train Final Model
         self.fit_model(X, Y, self.alpha_plus, self.alpha_minus, self.kappa, self.label_type)
 
         # Two Topic Save
         word_df = self.get_topic_df()
-        word_df.to_csv('results/two_topic_score_usr_type_{}_alpha_{}_mae_{:.2f}.csv'.format(self.user_type, self.alpha_plus, mae))
+        word_df.to_csv('results/two_topic_score_{}_usr_type_{}_alpha_{}_kappa_{}_mae_{:.2f}_acc_{:.2f}.csv'.format(self.label_type, self.user_type, self.alpha_plus, self.kappa, scores['mae'], scores['acc']))
 
         # Vectorizer
         prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist())
@@ -270,6 +281,6 @@ class TwoTopicModel(BasePredictor):
         prediction_Y_hat = self.predict_model(prediction_X)
         
         prediction_df['prediction'] = [val*4+1 if val != None else None for val in prediction_Y_hat]
-        prediction_df.to_csv('results/model_{}_usr_type_{}_alpha_{}_mae_{:.2f}.csv'.format('two_topic_model', self.user_type, self.alpha_plus, mae))
+        prediction_df.to_csv('results/{}_{}_usr_type_{}_alpha_{}_kappa_{}_mae_{:.2f}_acc_{:.2f}.csv'.format('two_topic_model', self.label_type, self.user_type, self.alpha_plus, self.kappa, scores['mae'], scores['acc']))
 
         return self

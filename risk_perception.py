@@ -98,8 +98,7 @@ class RiskPerception:
         return prediction_df
 
     def fit_transform_models(self, perceived_risk_df, prediction_df):
-        
-        """
+                
         # Prediction Models for Categorical Label 
         ## Model1. TF-IDF + RandomForest
         model1_params = self.config['model1_params']
@@ -112,7 +111,7 @@ class RiskPerception:
 
         model2_predictor = RandomForest()
         model2_predictor.run(perceived_risk_df, prediction_df, model2_params)
-        """
+        
         
         ## Model3. Correlation Filtering + Two Topic Model
         model3_params = self.config['model3_params']
