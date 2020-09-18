@@ -32,7 +32,7 @@ def get_config():
                               }
 
     # Model2. RandomForest with Correlation Filtering
-    params['model2_params'] = {'vectorizer': {'vectorizer_type': 'correlation_filtering', 'min_df': 10, 'max_features': 3000,
+    params['model2_params'] = {'vectorizer': {'vectorizer_type': 'corr_filter', 'min_df': 10, 'max_features': 3000,
                                              'alpha':0.05, # alpha: correlation filter    
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'random_forest',

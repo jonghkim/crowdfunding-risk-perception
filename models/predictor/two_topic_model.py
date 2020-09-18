@@ -173,7 +173,8 @@ class TwoTopicModel(BasePredictor):
         # k fold validation
         kf = KFold(n_splits=k_fold_cv)
 
-        scores_list = []
+        is_scores_list = []
+        oos_scores_list = []
 
         for train_index, test_index in kf.split(X):
             train_X, test_X = X[train_index], X[test_index]
@@ -181,15 +182,22 @@ class TwoTopicModel(BasePredictor):
 
             self.fit_model(train_X, train_Y, self.alpha_plus, self.alpha_minus, self.kappa, self.label_type)
 
+            train_Y_hat = self.predict_model(train_X) 
+            is_scores = self.evaluation(train_Y_hat, train_Y)           
+            is_scores_list.append(is_scores)
+
+
             test_Y_hat = self.predict_model(test_X)
-            scores = self.evaluation(test_Y_hat, test_Y)           
-            scores_list.append(scores)
+            oos_scores = self.evaluation(test_Y_hat, test_Y)           
+            oos_scores_list.append(oos_scores)
 
-        scores_df = pd.DataFrame(scores_list)
+        is_scores_df = pd.DataFrame(is_scores_list)
+        oos_scores_df = pd.DataFrame(oos_scores_list)
 
-        print("Average Scores: ", scores_df.mean())
+        print("In-Sample Average Scores: ", oos_scores_df.mean())
+        print("Out-of-Sample Average Scores: ", oos_scores_df.mean())
 
-        return scores_df.mean()
+        return oos_scores_df.mean()
 
     def fit_model(self, X, y, alpha_plus=0.25, alpha_minus=0.25, kappa=0.01, label_type='categorical_type1'):
         print("# Two Topic Model Fit Model")
@@ -272,7 +280,7 @@ class TwoTopicModel(BasePredictor):
 
         # Two Topic Save
         word_df = self.get_topic_df()
-        word_df.to_csv('results/two_topic_score_{}_usr_type_{}_alpha_{}_kappa_{}_mae_{:.2f}_acc_{:.2f}.csv'.format(self.label_type, self.user_type, self.alpha_plus, self.kappa, scores['mae'], scores['acc']))
+        word_df.to_csv('results/two_topic_score_{}_usr_type_{}_wv_size_{}_alpha_{}_kappa_{}_mae_{:.2f}_acc_{:.2f}.csv'.format(self.label_type, self.user_type, self.alpha_plus, self.kappa, scores['mae'], scores['acc']))
 
         # Vectorizer
         prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist())
@@ -281,6 +289,6 @@ class TwoTopicModel(BasePredictor):
         prediction_Y_hat = self.predict_model(prediction_X)
         
         prediction_df['prediction'] = [val*4+1 if val != None else None for val in prediction_Y_hat]
-        prediction_df.to_csv('results/{}_{}_usr_type_{}_alpha_{}_kappa_{}_mae_{:.2f}_acc_{:.2f}.csv'.format('two_topic_model', self.label_type, self.user_type, self.alpha_plus, self.kappa, scores['mae'], scores['acc']))
+        prediction_df.to_csv('results/{}_{}_usr_type_{}_wv_size_{}_alpha_{}_kappa_{}_mae_{:.2f}_acc_{:.2f}.csv'.format('two_topic_model', self.label_type, self.user_type, word_df.shape[0], self.alpha_plus, self.kappa, scores['mae'], scores['acc']))
 
         return self

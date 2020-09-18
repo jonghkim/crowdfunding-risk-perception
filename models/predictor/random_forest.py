@@ -180,7 +180,7 @@ class RandomForest(BasePredictor):
         elif self.vectorizer_type == 'corr_filter':
             X, word_list = self.fit_vectorizer(perceived_risk_df['risk_desc'].tolist(), self.vectorizer_type, Y)
             prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
-
+        
         # Evaluation Model
         acc = self.evaluate_model(X, Y, self.hyperparams, self.k_fold_cv)
 
@@ -195,8 +195,8 @@ class RandomForest(BasePredictor):
         prediction_df['prediction'] = prediction_Y_hat
 
         if self.vectorizer_type == 'tf_idf':
-            prediction_df.to_csv('results/{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('rf_{}'.format(self.vectorizer_type), self.label_type, self.user_type, acc))
+            prediction_df.to_csv('results/{}_wv_size_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('rf_{}'.format(self.vectorizer_type), len(word_list), self.label_type, self.user_type, acc))
         elif self.vectorizer_type == 'corr_filter':
-            prediction_df.to_csv('results/{}_alpha_{}_kappa_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('rf_{}'.format(self.vectorizer_type), self.alpha, self.kappa, self.label_type, self.user_type, acc))
+            prediction_df.to_csv('results/{}_wv_size_{}_alpha_{}_kappa_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('rf_{}'.format(self.vectorizer_type), len(word_list), self.alpha, self.kappa, self.label_type, self.user_type, acc))
         
         return self

@@ -60,3 +60,4 @@ class VectorizerCorrelationFiltering:
         minus_word_list = [word_list[index] for index in S_minus]
 
         return train_D_S, plus_word_list, minus_word_list, vectorizer, S_hat
+
