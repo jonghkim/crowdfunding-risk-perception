@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from models.predictor.base_predictor import BasePredictor
-from sklearn.linear_model import ElasticNet
+from sklearn import svm
 
 from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
 from models.vectorizer.vectorizer_correlation_filtering import VectorizerCorrelationFiltering
@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 
-class ElasticNet(BasePredictor):
+class SVM(BasePredictor):
     def __init__(self):
         self.vectorizer = None
         self.prediction_model = None    
@@ -86,7 +86,7 @@ class ElasticNet(BasePredictor):
         return label
 
     def evaluate_model(self, X, Y, hyperparams, k_fold_cv):
-        evaluation_model = ElasticNet(**hyperparams)
+        evaluation_model = svm.SVR(**hyperparams)
 
         scoring = {'mae': 'mean_absolute_error',
                    'prec': 'precision_macro',
@@ -106,7 +106,7 @@ class ElasticNet(BasePredictor):
         return np.mean(scores['test_acc'])
 
     def fit_model(self, X, Y, hyperparams):
-        self.prediction_model = ElasticNet(**hyperparams)
+        self.prediction_model = svm.SVR(**hyperparams)
         self.prediction_model.fit(X, Y)
 
         return self
@@ -143,9 +143,9 @@ class ElasticNet(BasePredictor):
         prediction_df['prediction'] = prediction_Y_hat
 
         if self.vectorizer_type == 'tf_idf':
-            prediction_df.to_csv('results/{}_wv_size_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.label_type, self.user_type, acc))
+            prediction_df.to_csv('results/{}_wv_size_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('svm_{}'.format(self.vectorizer_type), len(word_list), self.label_type, self.user_type, acc))
         elif self.vectorizer_type == 'corr_filter':
-            prediction_df.to_csv('results/{}_wv_size_{}_alpha_{}_kappa_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.alpha, self.kappa, self.label_type, self.user_type, acc))
+            prediction_df.to_csv('results/{}_wv_size_{}_alpha_{}_kappa_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('svm_{}'.format(self.vectorizer_type), len(word_list), self.alpha, self.kappa, self.label_type, self.user_type, acc))
         
         return self
         

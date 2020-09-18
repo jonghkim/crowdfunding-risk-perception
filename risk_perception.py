@@ -12,6 +12,8 @@ from sklearn.model_selection import train_test_split
 
 from models.predictor.random_forest import RandomForest
 from models.predictor.two_topic_model import TwoTopicModel
+from models.predictor.svm import SVM
+from models.predictor.elastic_net import ElasticNet
 
 class RiskPerception:
     def __init__(self):
@@ -112,22 +114,33 @@ class RiskPerception:
         model2_predictor = RandomForest()
         model2_predictor.run(perceived_risk_df, prediction_df, model2_params)
         
-        
         ## Model3. Correlation Filtering + Two Topic Model
         model3_params = self.config['model3_params']
         model3_predictor = TwoTopicModel()
         model3_predictor.run(perceived_risk_df, prediction_df, model3_params)
         
-        """
         # Prediction Models for Numerical Label
         ## Model4. TF-IDF + ElasticNet
         model4_params = self.config['model4_params']
+        model4_predictor = SVM()
+        model4_predictor.run(perceived_risk_df, prediction_df, model4_params)
 
         ## Model5. Correlation Filtering + ElasticNet        
         model5_params = self.config['model5_params']
-        """
+        model5_predictor = SVM()
+        model5_predictor.run(perceived_risk_df, prediction_df, model5_params)
+    
+        ## Model6. TF-IDF + ElasticNet
+        model6_params = self.config['model6_params']
+        model6_predictor = ElasticNet()
+        model6_predictor.run(perceived_risk_df, prediction_df, model6_params)
+    
+        ## Model7. Correlation Filtering + ElasticNet        
+        model7_params = self.config['model7_params']
+        model7_predictor = ElasticNet()
+        model7_predictor.run(perceived_risk_df, prediction_df, model7_params)
 
-        pass
+        return self
 
     def run(self):
         # Load Data

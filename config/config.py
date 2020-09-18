@@ -65,11 +65,73 @@ def get_config():
                                               }
                                }
     ## Prediction Models for Numerical Label
-    # Model4. ElasticNet with TF-IDF
-    params['model4_params'] = {}
+    # Model4. SVM with TF-IDF
+    params['model4_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
+                               'predictor': {'model_type': 'svm',
+                                             'user_type': params['user_type'],
+                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'k_fold_cv':5,
+                                             'hyperparams': {'kernel':'rbf', 
+                                                            'degree':3, 
+                                                            'gamma':'scale', 
+                                                            'coef0':0.0, 'tol':0.001, 
+                                                            'C':1.0, 'epsilon':0.1, 'shrinking':True, 'cache_size':200, 
+                                                            'verbose':False, 'max_iter':-1
+                                                            },               
+                                            'plot_feature_importance':False}
+                              }
 
-    # Model5. ElasticNet with Correlation Filtering
-    params['model5_params'] = {}
+
+
+    # Model5. SVM with Correlation Filtering
+    params['model5_params'] = {'vectorizer': {'vectorizer_type': 'corr_filter', 'min_df': 10, 'max_features': 3000,
+                                             'alpha':0.05, # alpha: correlation filter    
+                                             'kappa':0.02}, # kappa: words frequency filter
+                               'predictor': {'model_type': 'svm',
+                                             'user_type': params['user_type'],
+                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'k_fold_cv':5,
+                                             'hyperparams': {'kernel':'rbf', 
+                                                            'degree':3, 
+                                                            'gamma':'scale', 
+                                                            'coef0':0.0, 'tol':0.001, 
+                                                            'C':1.0, 'epsilon':0.1, 'shrinking':True, 'cache_size':200, 
+                                                            'verbose':False, 'max_iter':-1
+                                                            },  
+                                             'plot_feature_importance':True}
+                              }
+
+    # Model6. ElasticNet with TF-IDF
+    params['model6_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
+                               'predictor': {'model_type': 'elastic_net',
+                                             'user_type': params['user_type'],
+                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'k_fold_cv':5,
+                                             'hyperparams': {'alpha':1.0, 'l1_ratio':0.5, 'fit_intercept':True, 
+                                                            'normalize':False, 'precompute':False, 
+                                                            'max_iter':1000, 'copy_X':True, 'tol':0.0001, 
+                                                            'warm_start':False, 'positive':False, 
+                                                            'random_state':None, 'selection':'cyclic'
+                                                            },
+                                            'plot_feature_importance':False}
+                              }
+
+    # Model7. ElasticNet with Correlation Filtering
+    params['model7_params'] = {'vectorizer': {'vectorizer_type': 'corr_filter', 'min_df': 10, 'max_features': 3000,
+                                             'alpha':0.05, # alpha: correlation filter    
+                                             'kappa':0.02}, # kappa: words frequency filter
+                               'predictor': {'model_type': 'elastic_net',
+                                             'user_type': params['user_type'],
+                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'k_fold_cv':5,
+                                             'hyperparams': {'alpha':1.0, 'l1_ratio':0.5, 'fit_intercept':True, 
+                                                            'normalize':False, 'precompute':False, 
+                                                            'max_iter':1000, 'copy_X':True, 'tol':0.0001, 
+                                                            'warm_start':False, 'positive':False, 
+                                                            'random_state':None, 'selection':'cyclic'
+                                                            },
+                                             'plot_feature_importance':True}
+                              }
 
     ##### Results #####
     params['result_dir'] = 'results'
