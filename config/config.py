@@ -107,9 +107,9 @@ def get_config():
                                              'user_type': params['user_type'],
                                              'label_type': 'numerical_type2', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
-                                             'hyperparams': {'alpha':1.0, 'l1_ratio':0.5, 'fit_intercept':True, 
-                                                            'normalize':False, 'precompute':False, 
-                                                            'max_iter':1000, 'copy_X':True, 'tol':0.0001, 
+                                             'hyperparams': {'alpha':0.000001, 'l1_ratio':0.5, 'fit_intercept':True, 
+                                                            'normalize':True, 'precompute':False, 
+                                                            'max_iter':100, 'copy_X':True, 'tol':0.01, 
                                                             'warm_start':False, 'positive':False, 
                                                             'random_state':None, 'selection':'cyclic'
                                                             },
@@ -124,9 +124,9 @@ def get_config():
                                              'user_type': params['user_type'],
                                              'label_type': 'numerical_type2', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
-                                             'hyperparams': {'alpha':1.0, 'l1_ratio':0.5, 'fit_intercept':True, 
-                                                            'normalize':False, 'precompute':False, 
-                                                            'max_iter':1000, 'copy_X':True, 'tol':0.0001, 
+                                             'hyperparams': {'alpha':0.000001, 'l1_ratio':0.5, 'fit_intercept':True, 
+                                                            'normalize':True, 'precompute':False, 
+                                                            'max_iter':100, 'copy_X':True, 'tol':0.01, 
                                                             'warm_start':False, 'positive':False, 
                                                             'random_state':None, 'selection':'cyclic'
                                                             },

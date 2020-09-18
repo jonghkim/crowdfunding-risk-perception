@@ -100,17 +100,15 @@ class RiskPerception:
         return prediction_df
 
     def fit_transform_models(self, perceived_risk_df, prediction_df):
-                
+      
         # Prediction Models for Categorical Label 
         ## Model1. TF-IDF + RandomForest
         model1_params = self.config['model1_params']
-
         model1_predictor = RandomForest()
         model1_predictor.run(perceived_risk_df, prediction_df, model1_params)
 
         ## Model2. Correlation Filtering + RandomForest 
         model2_params = self.config['model2_params']
-
         model2_predictor = RandomForest()
         model2_predictor.run(perceived_risk_df, prediction_df, model2_params)
         
@@ -129,7 +127,7 @@ class RiskPerception:
         model5_params = self.config['model5_params']
         model5_predictor = SVM()
         model5_predictor.run(perceived_risk_df, prediction_df, model5_params)
-    
+        
         ## Model6. TF-IDF + ElasticNet
         model6_params = self.config['model6_params']
         model6_predictor = ElasticNet()
