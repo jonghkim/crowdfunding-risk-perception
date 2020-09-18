@@ -88,21 +88,13 @@ class ElasticNet(BasePredictor):
     def evaluate_model(self, X, Y, hyperparams, k_fold_cv):
         evaluation_model = ElNet(**hyperparams)
 
-        scoring = {'mae': 'neg_mean_absolute_error',
-                   'prec': 'precision_macro',
-                   'rec': 'recall_macro'}
+        scoring = {'mae': 'neg_mean_absolute_error'}
                 
         scores = cross_validate(evaluation_model, X, Y, scoring=scoring)
 
         # Test Set Score
-        print("Train Set - Mean MAE: ", np.mean(scores['train_mae']))
-        print("Train Set - Mean Precision: ", np.mean(scores['train_prec']))
-        print("Train Set - Mean Recall: ", np.mean(scores['train_rec']))
-        
+        print("Train Set - Mean MAE: ", np.mean(scores['train_mae']))        
         print("Test Set - Mean MAE: ", np.mean(scores['test_mae']))
-        print("Test Set - Mean Precision: ", np.mean(scores['test_prec']))
-        print("Test Set - Mean Recall: ", np.mean(scores['test_rec']))
-
         return np.mean(scores['test_acc'])
 
     def fit_model(self, X, Y, hyperparams):
