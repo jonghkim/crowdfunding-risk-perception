@@ -89,22 +89,22 @@ class SVM(BasePredictor):
     def evaluate_model(self, X, Y, hyperparams, k_fold_cv):
         evaluation_model = svm.SVR(**hyperparams)
 
-        scoring = {'mae': 'mean_absolute_error',
+        scoring = {'mae': 'neg_mean_absolute_error',
                    'prec': 'precision_macro',
                    'rec': 'recall_macro'}
                 
         scores = cross_validate(evaluation_model, X, Y, scoring=scoring)
 
         # Test Set Score
-        print("Train Set - Mean Acc: ", np.mean(scores['train_acc']))
+        print("Train Set - Mean MAE: ", np.mean(scores['train_mae']))
         print("Train Set - Mean Precision: ", np.mean(scores['train_prec']))
         print("Train Set - Mean Recall: ", np.mean(scores['train_rec']))
         
-        print("Test Set - Mean Acc: ", np.mean(scores['test_acc']))
+        print("Test Set - Mean MAE: ", np.mean(scores['test_mae']))
         print("Test Set - Mean Precision: ", np.mean(scores['test_prec']))
         print("Test Set - Mean Recall: ", np.mean(scores['test_rec']))
 
-        return np.mean(scores['test_acc'])
+        return np.mean(scores['test_mae'])
 
     def fit_model(self, X, Y, hyperparams):
         self.prediction_model = svm.SVR(**hyperparams)
@@ -134,7 +134,7 @@ class SVM(BasePredictor):
             prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
         
         # Evaluation Model
-        acc = self.evaluate_model(X, Y, self.hyperparams, self.k_fold_cv)
+        mae = self.evaluate_model(X, Y, self.hyperparams, self.k_fold_cv)
 
         # Train Final Model
         self.fit_model(X, Y, self.hyperparams)
@@ -144,9 +144,9 @@ class SVM(BasePredictor):
         prediction_df['prediction'] = prediction_Y_hat
 
         if self.vectorizer_type == 'tf_idf':
-            prediction_df.to_csv('results/{}_wv_size_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('svm_{}'.format(self.vectorizer_type), len(word_list), self.label_type, self.user_type, acc))
+            prediction_df.to_csv('results/{}_wv_size_{}_{}_usr_type_{}_mae_{:.2f}.csv'.format('svm_{}'.format(self.vectorizer_type), len(word_list), self.label_type, self.user_type, mae))
         elif self.vectorizer_type == 'corr_filter':
-            prediction_df.to_csv('results/{}_wv_size_{}_alpha_{}_kappa_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('svm_{}'.format(self.vectorizer_type), len(word_list), self.alpha, self.kappa, self.label_type, self.user_type, acc))
+            prediction_df.to_csv('results/{}_wv_size_{}_alpha_{}_kappa_{}_{}_usr_type_{}_mae_{:.2f}.csv'.format('svm_{}'.format(self.vectorizer_type), len(word_list), self.alpha, self.kappa, self.label_type, self.user_type, mae))
         
         return self
         

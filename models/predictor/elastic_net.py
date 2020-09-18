@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from models.predictor.base_predictor import BasePredictor
-from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import ElasticNet as ElNet
 from sklearn.model_selection import cross_validate
 
 from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
@@ -11,7 +11,6 @@ from models.pipeline.label_generator.label_generator import LabelGenerator
 
 import numpy as np
 import pandas as pd
-
 
 class ElasticNet(BasePredictor):
     def __init__(self):
@@ -87,27 +86,27 @@ class ElasticNet(BasePredictor):
         return label
 
     def evaluate_model(self, X, Y, hyperparams, k_fold_cv):
-        evaluation_model = ElasticNet(**hyperparams)
+        evaluation_model = ElNet(**hyperparams)
 
-        scoring = {'mae': 'mean_absolute_error',
+        scoring = {'mae': 'neg_mean_absolute_error',
                    'prec': 'precision_macro',
                    'rec': 'recall_macro'}
                 
         scores = cross_validate(evaluation_model, X, Y, scoring=scoring)
 
         # Test Set Score
-        print("Train Set - Mean Acc: ", np.mean(scores['train_acc']))
+        print("Train Set - Mean MAE: ", np.mean(scores['train_mae']))
         print("Train Set - Mean Precision: ", np.mean(scores['train_prec']))
         print("Train Set - Mean Recall: ", np.mean(scores['train_rec']))
         
-        print("Test Set - Mean Acc: ", np.mean(scores['test_acc']))
+        print("Test Set - Mean MAE: ", np.mean(scores['test_mae']))
         print("Test Set - Mean Precision: ", np.mean(scores['test_prec']))
         print("Test Set - Mean Recall: ", np.mean(scores['test_rec']))
 
         return np.mean(scores['test_acc'])
 
     def fit_model(self, X, Y, hyperparams):
-        self.prediction_model = ElasticNet(**hyperparams)
+        self.prediction_model = ElNet(**hyperparams)
         self.prediction_model.fit(X, Y)
 
         return self
@@ -134,7 +133,7 @@ class ElasticNet(BasePredictor):
             prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
         
         # Evaluation Model
-        acc = self.evaluate_model(X, Y, self.hyperparams, self.k_fold_cv)
+        mae = self.evaluate_model(X, Y, self.hyperparams, self.k_fold_cv)
 
         # Train Final Model
         self.fit_model(X, Y, self.hyperparams)
@@ -144,9 +143,9 @@ class ElasticNet(BasePredictor):
         prediction_df['prediction'] = prediction_Y_hat
 
         if self.vectorizer_type == 'tf_idf':
-            prediction_df.to_csv('results/{}_wv_size_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.label_type, self.user_type, acc))
+            prediction_df.to_csv('results/{}_wv_size_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.label_type, self.user_type, mae))
         elif self.vectorizer_type == 'corr_filter':
-            prediction_df.to_csv('results/{}_wv_size_{}_alpha_{}_kappa_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.alpha, self.kappa, self.label_type, self.user_type, acc))
+            prediction_df.to_csv('results/{}_wv_size_{}_alpha_{}_kappa_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.alpha, self.kappa, self.label_type, self.user_type, mae))
         
         return self
         
