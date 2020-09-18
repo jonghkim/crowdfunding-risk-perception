@@ -33,7 +33,7 @@ def get_config():
 
     # Model2. RandomForest with Correlation Filtering
     params['model2_params'] = {'vectorizer': {'vectorizer_type': 'corr_filter', 'min_df': 10, 'max_features': 3000,
-                                             'alpha':0.05, # alpha: correlation filter    
+                                             'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'random_forest',
                                              'user_type': params['user_type'],
@@ -58,8 +58,8 @@ def get_config():
                                               'label_type': 'categorical_type1', # categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                               'k_fold_cv':5,                                             
                                               'hyperparams':{
-                                                            'alpha_plus':0.05, # high risk words
-                                                            'alpha_minus':0.05, # low risk words
+                                                            'alpha_plus':0.1, # high risk words
+                                                            'alpha_minus':0.1, # low risk words
                                                             'kappa':0.02, # min doc filter
                                                             'lamb':1}  #lamb: beta priori penalty
                                               }
@@ -85,7 +85,7 @@ def get_config():
 
     # Model5. SVM with Correlation Filtering
     params['model5_params'] = {'vectorizer': {'vectorizer_type': 'corr_filter', 'min_df': 10, 'max_features': 3000,
-                                             'alpha':0.05, # alpha: correlation filter    
+                                             'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'svm',
                                              'user_type': params['user_type'],
@@ -118,7 +118,7 @@ def get_config():
 
     # Model7. ElasticNet with Correlation Filtering
     params['model7_params'] = {'vectorizer': {'vectorizer_type': 'corr_filter', 'min_df': 10, 'max_features': 3000,
-                                             'alpha':0.05, # alpha: correlation filter    
+                                             'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'elastic_net',
                                              'user_type': params['user_type'],

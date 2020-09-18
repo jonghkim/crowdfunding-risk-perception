@@ -250,8 +250,13 @@ class TwoTopicModel(BasePredictor):
         scores['r_2'] = r2_score(test_Y*2+3, prediction_np*4+1)
 
         # Categorical Evaluation
-        prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction_np])
-        test_Y_category = np.array([1 if score > 0 else 0 for score in test_Y])
+        if self.label_type == 'categorical_type1':
+            prediction_category = np.array([1 if score > 0.5 else 0 for score in prediction_np])
+            test_Y_category = np.array([1 if score > 0 else 0 for score in test_Y])
+            
+        elif self.label_type == 'categorical_type2':
+            prediction_category = np.array([1 if score >= 0.5 else 0 for score in prediction_np])
+            test_Y_category = np.array([1 if score >= 0 else 0 for score in test_Y])
 
         scores['acc'] = accuracy_score(prediction_category, test_Y_category)
         scores['precision'] = precision_score(test_Y_category, prediction_category, average='micro')
