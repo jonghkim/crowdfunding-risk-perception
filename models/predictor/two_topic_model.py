@@ -194,13 +194,12 @@ class TwoTopicModel(BasePredictor):
         is_scores_df = pd.DataFrame(is_scores_list)
         oos_scores_df = pd.DataFrame(oos_scores_list)
 
-        print("In-Sample Average Scores: ", oos_scores_df.mean())
+        print("In-Sample Average Scores: ", is_scores_df.mean())
         print("Out-of-Sample Average Scores: ", oos_scores_df.mean())
 
         return oos_scores_df.mean()
 
     def fit_model(self, X, y, alpha_plus=0.25, alpha_minus=0.25, kappa=0.01, label_type='categorical_type1'):
-        print("# Two Topic Model Fit Model")
         
         S_hat, S_plus, S_minus = self.sreen_sentiment_charged_words(X, y, alpha_plus, alpha_minus, kappa, label_type)
         O_hat = self.estimate_two_topic(y, X, S_hat)
@@ -258,11 +257,10 @@ class TwoTopicModel(BasePredictor):
         scores['precision'] = precision_score(test_Y_category, prediction_category, average='micro')
         scores['recall'] = recall_score(test_Y_category, prediction_category, average='micro')
 
-        print(scores)
-
         return scores        
 
     def run(self, perceived_risk_df, prediction_df, params):
+        print("# Two Topic Model")
         
         # Set Config
         self.set_config(params)
@@ -280,7 +278,7 @@ class TwoTopicModel(BasePredictor):
 
         # Two Topic Save
         word_df = self.get_topic_df()
-        word_df.to_csv('results/two_topic_score_{}_usr_type_{}_wv_size_{}_alpha_{}_kappa_{}_mae_{:.2f}_acc_{:.2f}.csv'.format(self.label_type, self.user_type, self.alpha_plus, self.kappa, scores['mae'], scores['acc']))
+        word_df.to_csv('results/two_topic_score_{}_usr_type_{}_wv_size_{}_alpha_{}_kappa_{}_mae_{:.2f}_acc_{:.2f}.csv'.format(self.label_type, self.user_type, word_df.shape[0],self.alpha_plus, self.kappa, scores['mae'], scores['acc']))
 
         # Vectorizer
         prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist())
