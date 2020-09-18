@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 
 from models.predictor.base_predictor import BasePredictor
 from sklearn.linear_model import ElasticNet
+from sklearn.model_selection import cross_validate
 
 from models.vectorizer.vectorizer_tfidf import VectorizerTfidf
 from models.vectorizer.vectorizer_correlation_filtering import VectorizerCorrelationFiltering
