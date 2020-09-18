@@ -18,7 +18,7 @@ def get_config():
     params['model1_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
                                'predictor': {'model_type': 'random_forest',
                                              'user_type': params['user_type'],
-                                             'label_type': 'categorical_type1', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'label_type': 'categorical_type1', # categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'hyperparams': {
                                                             'bootstrap': True,
@@ -37,7 +37,7 @@ def get_config():
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'random_forest',
                                              'user_type': params['user_type'],
-                                             'label_type': 'categorical_type1', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'label_type': 'categorical_type1', # categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'hyperparams': {
                                                             'bootstrap': True,
@@ -69,7 +69,7 @@ def get_config():
     params['model4_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
                                'predictor': {'model_type': 'svm',
                                              'user_type': params['user_type'],
-                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'label_type': 'numerical_type2', # numerical_type2, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'hyperparams': {'kernel':'rbf', 
                                                             'degree':3, 
@@ -89,7 +89,7 @@ def get_config():
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'svm',
                                              'user_type': params['user_type'],
-                                             'label_type': 'numerical', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
+                                             'label_type': 'numerical_type2', # numerical_type2, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
                                              'hyperparams': {'kernel':'rbf', 
                                                             'degree':3, 

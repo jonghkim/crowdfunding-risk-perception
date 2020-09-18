@@ -46,7 +46,7 @@ class TwoTopicModel(BasePredictor):
 
     def get_label(self, df):
         label_generator = LabelGenerator()
-        label = label_generator.get_label(df['perceived_risk'].tolist(), 'numerical')
+        label = label_generator.get_label(df['perceived_risk'].tolist(), 'numerical_type1')
         label = np.array(label)
         
         return label

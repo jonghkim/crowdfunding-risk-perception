@@ -93,9 +93,9 @@ class ElasticNet(BasePredictor):
         scores = cross_validate(evaluation_model, X, Y, scoring=scoring)
 
         # Test Set Score
-        print("Train Set - Mean MAE: ", np.mean(scores['train_mae']))        
-        print("Test Set - Mean MAE: ", np.mean(scores['test_mae']))
-        return np.mean(scores['test_mae'])
+        print("Train Set - Mean MAE: ", -np.mean(scores['train_mae']))        
+        print("Test Set - Mean MAE: ", -np.mean(scores['test_mae']))
+        return -np.mean(scores['test_mae'])
 
     def fit_model(self, X, Y, hyperparams):
         self.prediction_model = ElNet(**hyperparams)
