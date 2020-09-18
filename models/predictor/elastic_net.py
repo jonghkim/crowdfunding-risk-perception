@@ -95,7 +95,7 @@ class ElasticNet(BasePredictor):
         # Test Set Score
         print("Train Set - Mean MAE: ", np.mean(scores['train_mae']))        
         print("Test Set - Mean MAE: ", np.mean(scores['test_mae']))
-        return np.mean(scores['test_acc'])
+        return np.mean(scores['test_mae'])
 
     def fit_model(self, X, Y, hyperparams):
         self.prediction_model = ElNet(**hyperparams)
@@ -135,9 +135,9 @@ class ElasticNet(BasePredictor):
         prediction_df['prediction'] = prediction_Y_hat
 
         if self.vectorizer_type == 'tf_idf':
-            prediction_df.to_csv('results/{}_wv_size_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.label_type, self.user_type, mae))
+            prediction_df.to_csv('results/{}_wv_size_{}_{}_usr_type_{}_mae_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.label_type, self.user_type, mae))
         elif self.vectorizer_type == 'corr_filter':
-            prediction_df.to_csv('results/{}_wv_size_{}_alpha_{}_kappa_{}_{}_usr_type_{}_acc_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.alpha, self.kappa, self.label_type, self.user_type, mae))
+            prediction_df.to_csv('results/{}_wv_size_{}_alpha_{}_kappa_{}_{}_usr_type_{}_mae_{:.2f}.csv'.format('elastic_net_{}'.format(self.vectorizer_type), len(word_list), self.alpha, self.kappa, self.label_type, self.user_type, mae))
         
         return self
         
