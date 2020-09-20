@@ -33,6 +33,7 @@ class TwoTopicModel(BasePredictor):
 
         # predictor
         self.model_type = params['predictor']['model_type']
+        self.prediction_label = params['predictor']['prediction_label']
         self.user_type = params['predictor']['user_type']        
         self.label_type = params['predictor']['label_type']        
         self.k_fold_cv = params['predictor']['k_fold_cv']        
@@ -286,8 +287,11 @@ class TwoTopicModel(BasePredictor):
         word_df.to_csv('results/two_topic_score_{}_usr_type_{}_wv_size_{}_alpha_{}_kappa_{}_mae_{:.2f}_acc_{:.2f}.csv'.format(self.label_type, self.user_type, word_df.shape[0],self.alpha_plus, self.kappa, scores['mae'], scores['acc']))
 
         # Vectorizer
-        prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist())
+        if self.prediction_label == 'desc_combined':
+            prediction_df['desc_combined'] =  prediction_df["total_desc"] + " " + prediction_df["risk_desc"]
 
+        prediction_X = self.transform_vectorizer(prediction_df[self.prediction_label].tolist(), self.vectorizer_type)
+        
         # Prediction
         prediction_Y_hat = self.predict_model(prediction_X)
         

@@ -7,16 +7,18 @@ def get_config():
     params['data_dir'] = 'data'
 
     params['labeled_data'] = 'labeled_data.csv'
-    params['prediction_data'] = 'prediction_data.csv'
+    params['prediction_data'] = 'desc_total_df_renewal.csv'
     
     ##### Preprocessing #####
     params['user_type'] = 'all' # all, experienced
+    params['prediction_label'] = 'desc_combined' # risk_desc, desc_total, desc_combined
 
     ##### Models #####
     ## Prediction Models for Categorical Label
     # Model1. RandomForest with TF-IDF
     params['model1_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
                                'predictor': {'model_type': 'random_forest',
+                                             'prediction_label': params['prediction_label'],
                                              'user_type': params['user_type'],
                                              'label_type': 'categorical_type1', # categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
@@ -36,6 +38,7 @@ def get_config():
                                              'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'random_forest',
+                                             'prediction_label': params['prediction_label'],
                                              'user_type': params['user_type'],
                                              'label_type': 'categorical_type1', # categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
@@ -54,6 +57,7 @@ def get_config():
     params['model3_params'] = {'vectorizer': {'min_df': 10, 'max_features': 3000
                                              },
                                 'predictor': {'model_type': 'two_topic_model', 
+                                              'prediction_label': params['prediction_label'],
                                               'user_type': params['user_type'],
                                               'label_type': 'categorical_type1', # categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                               'k_fold_cv':5,                                             
@@ -68,6 +72,7 @@ def get_config():
     # Model4. SVM with TF-IDF
     params['model4_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
                                'predictor': {'model_type': 'svm',
+                                             'prediction_label': params['prediction_label'],
                                              'user_type': params['user_type'],
                                              'label_type': 'numerical_type2', # numerical_type2, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
@@ -88,6 +93,7 @@ def get_config():
                                              'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'svm',
+                                             'prediction_label': params['prediction_label'],
                                              'user_type': params['user_type'],
                                              'label_type': 'numerical_type2', # numerical_type2, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
@@ -104,6 +110,7 @@ def get_config():
     # Model6. ElasticNet with TF-IDF
     params['model6_params'] = {'vectorizer': {'vectorizer_type': 'tf_idf', 'min_df': 10, 'max_features': 3000}, 
                                'predictor': {'model_type': 'elastic_net',
+                                             'prediction_label': params['prediction_label'],
                                              'user_type': params['user_type'],
                                              'label_type': 'numerical_type2', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,
@@ -121,6 +128,7 @@ def get_config():
                                              'alpha':0.1, # alpha: correlation filter    
                                              'kappa':0.02}, # kappa: words frequency filter
                                'predictor': {'model_type': 'elastic_net',
+                                             'prediction_label': params['prediction_label'],
                                              'user_type': params['user_type'],
                                              'label_type': 'numerical_type2', # numerical, categorical_type1: [1,3]/(3,5], categorical_type2: [1,3)/[3,5]
                                              'k_fold_cv':5,

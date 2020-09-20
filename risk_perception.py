@@ -63,34 +63,36 @@ class RiskPerception:
 
         return perceived_risk_df
 
-    def normalizing_risk_description(self, perceived_risk_df):
+    def normalizing_risk_description(self, perceived_risk_df, cols):
         
         print("## Before NA Text Drop: ", perceived_risk_df.shape[0])
-        perceived_risk_df.dropna(subset=['risk_desc'], inplace=True)
+        perceived_risk_df.dropna(subset=cols, inplace=True)
         print("## After NA Text Drop: ", perceived_risk_df.shape[0])
-        perceived_risk_df['risk_desc'] = perceived_risk_df['risk_desc'].apply(str)
 
-        print("## Normalizing Risk Description")
+        for col in cols:
+            perceived_risk_df[col] = perceived_risk_df[col].apply(str)
 
-        text_normalizer = TextNormalizer()
+            print("## Normalizing Risk Description")
 
-        # Step 1. Standardize
-        # - Lower Case
-        print("Upper Case to Lower Case")
-        perceived_risk_df = text_normalizer.lower_case(perceived_risk_df)
-        # - Remove Space
-        print("Remove Extra Space")
-        perceived_risk_df = text_normalizer.remove_extra_spaces(perceived_risk_df)
-        # - Expand Abbrviated Text
-        print("Expand Abbreviated Words")
-        perceived_risk_df = text_normalizer.expand_abbreviation(perceived_risk_df)
-        # - Remove Non English Special Characters
-        print("Remove Non-English")
-        perceived_risk_df = text_normalizer.remove_non_english(perceived_risk_df)
-        # Step 2. Remove Stop Words & Lemmatization
-        print("Normalize Text with Lemmatization and Stop Words Removal")
-        perceived_risk_df = text_normalizer.normalize_text(perceived_risk_df)
-        print("\n")
+            text_normalizer = TextNormalizer()
+
+            # Step 1. Standardize
+            # - Lower Case
+            print("Upper Case to Lower Case")
+            perceived_risk_df[col] = text_normalizer.lower_case(perceived_risk_df, col)
+            # - Remove Space
+            print("Remove Extra Space")
+            perceived_risk_df[col] = text_normalizer.remove_extra_spaces(perceived_risk_df, col)
+            # - Expand Abbrviated Text
+            print("Expand Abbreviated Words")
+            perceived_risk_df[col] = text_normalizer.expand_abbreviation(perceived_risk_df, col)
+            # - Remove Non English Special Characters
+            print("Remove Non-English")
+            perceived_risk_df[col] = text_normalizer.remove_non_english(perceived_risk_df, col)
+            # Step 2. Remove Stop Words & Lemmatization
+            print("Normalize Text with Lemmatization and Stop Words Removal")
+            perceived_risk_df[col] = text_normalizer.normalize_text(perceived_risk_df, col)
+            print("\n")
         
         return perceived_risk_df
 
@@ -148,8 +150,8 @@ class RiskPerception:
         perceived_risk_df = self.get_project_level_perceived_risk(labeled_data_df, self.user_type)
         
         # Normalize Risk Description
-        perceived_risk_df = self.normalizing_risk_description(perceived_risk_df)
-        prediction_df = self.normalizing_risk_description(prediction_df)
+        perceived_risk_df = self.normalizing_risk_description(perceived_risk_df, ['risk_desc'])
+        prediction_df = self.normalizing_risk_description(prediction_df, ['risk_desc', 'total_desc'])
 
         # Merge Label Info
         prediction_df = self.merge_training_with_prediction_df(perceived_risk_df, prediction_df)

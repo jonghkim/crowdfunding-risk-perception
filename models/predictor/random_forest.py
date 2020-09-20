@@ -31,6 +31,7 @@ class RandomForest(BasePredictor):
 
         # predictor
         self.model_type = params['predictor']['model_type']
+        self.prediction_label = params['predictor']['prediction_label']
         self.user_type = params['predictor']['user_type']
         self.label_type = params['predictor']['label_type']        
         self.hyperparams = params['predictor']['hyperparams']
@@ -176,10 +177,19 @@ class RandomForest(BasePredictor):
         # Get Features
         if self.vectorizer_type == 'tf_idf':
             X, word_list = self.fit_vectorizer(perceived_risk_df['risk_desc'].tolist(), self.vectorizer_type)
-            prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
+            
+            if self.prediction_label == 'desc_combined':
+                prediction_df['desc_combined'] =  prediction_df["total_desc"] + " " + prediction_df["risk_desc"]
+
+            prediction_X = self.transform_vectorizer(prediction_df[self.prediction_label].tolist(), self.vectorizer_type)
+
         elif self.vectorizer_type == 'corr_filter':
             X, word_list = self.fit_vectorizer(perceived_risk_df['risk_desc'].tolist(), self.vectorizer_type, Y)
-            prediction_X = self.transform_vectorizer(prediction_df['risk_desc'].tolist(), self.vectorizer_type)
+
+            if self.prediction_label == 'desc_combined':
+                prediction_df['desc_combined'] =  prediction_df["total_desc"] + " " + prediction_df["risk_desc"]
+
+            prediction_X = self.transform_vectorizer(prediction_df[self.prediction_label].tolist(), self.vectorizer_type)
         
         # Evaluation Model
         acc = self.evaluate_model(X, Y, self.hyperparams, self.k_fold_cv)
