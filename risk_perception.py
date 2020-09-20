@@ -70,7 +70,7 @@ class RiskPerception:
     def normalizing_risk_description(self, df, cols):
         
         print("## Before NA Text Drop: ", df.shape[0])
-        df.dropna(subset=cols, inplace=True)
+        df.dropna(subset=cols, inplace=True, how='all')
         print("## After NA Text Drop: ", df.shape[0])
 
         for col in cols:
@@ -158,13 +158,16 @@ class RiskPerception:
         
             # Normalize Risk Description
             perceived_risk_df = self.normalizing_risk_description(perceived_risk_df, ['risk_desc'])
+
+            perceived_risk_df.to_csv('data/normalized_perceived_risk_df.csv')
         else:
             perceived_risk_df = labeled_data_df
 
         if 'normalized_' not in self.prediction_data:
-            prediction_df = self.normalizing_risk_description(prediction_df, ['risk_desc', 'desc_total'])
+            prediction_df = self.normalizing_risk_description(prediction_df, ['desc_total','risk_desc'])
             # Merge Label Info
             prediction_df = self.merge_training_with_prediction_df(perceived_risk_df, prediction_df)
+            prediction_df.to_csv('data/normalized_prediction_df.csv')
         
         # Training        
         self.fit_transform_models(perceived_risk_df, prediction_df)
