@@ -6,8 +6,8 @@ def get_config():
     ##### Data #####
     params['data_dir'] = 'data'
 
-    params['labeled_data'] = 'labeled_data.csv'
-    params['prediction_data'] = 'desc_total_df_renewal.csv'
+    params['labeled_data'] = 'normalized_perceived_risk_df' #'labeled_data.csv'
+    params['prediction_data'] = 'normalized_prediction_df.csv' #'desc_total_df_renewal.csv'
     
     ##### Preprocessing #####
     params['user_type'] = 'all' # all, experienced

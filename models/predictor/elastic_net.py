@@ -122,14 +122,14 @@ class ElasticNet(BasePredictor):
             X, word_list = self.fit_vectorizer(perceived_risk_df['risk_desc'].tolist(), self.vectorizer_type)
 
             if self.prediction_label == 'desc_combined':
-                prediction_df['desc_combined'] =  prediction_df["total_desc"] + " " + prediction_df["risk_desc"]
+                prediction_df['desc_combined'] =  prediction_df["desc_total"] + " " + prediction_df["risk_desc"]
 
             prediction_X = self.transform_vectorizer(prediction_df[self.prediction_label].tolist(), self.vectorizer_type)
             
         elif self.vectorizer_type == 'corr_filter':
             X, word_list = self.fit_vectorizer(perceived_risk_df['risk_desc'].tolist(), self.vectorizer_type, Y)
             if self.prediction_label == 'desc_combined':
-                prediction_df['desc_combined'] =  prediction_df["total_desc"] + " " + prediction_df["risk_desc"]
+                prediction_df['desc_combined'] =  prediction_df["desc_total"] + " " + prediction_df["risk_desc"]
 
             prediction_X = self.transform_vectorizer(prediction_df[self.prediction_label].tolist(), self.vectorizer_type)
         

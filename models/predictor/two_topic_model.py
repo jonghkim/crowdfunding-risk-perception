@@ -288,7 +288,7 @@ class TwoTopicModel(BasePredictor):
 
         # Vectorizer
         if self.prediction_label == 'desc_combined':
-            prediction_df['desc_combined'] =  prediction_df["total_desc"] + " " + prediction_df["risk_desc"]
+            prediction_df['desc_combined'] =  prediction_df["desc_total"] + " " + prediction_df["risk_desc"]
 
         prediction_X = self.transform_vectorizer(prediction_df[self.prediction_label].tolist(), self.vectorizer_type)
         

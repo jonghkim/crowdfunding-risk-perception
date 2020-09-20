@@ -9,23 +9,23 @@ from nltk.tokenize import word_tokenize
 
 class TextNormalizer:    
 
-    def lower_case(self, df, col):
-        df[col] = df[col].str.lower()
+    def lower_case(self, text_ser):
+        text_ser = text_ser.str.lower()
 
-        return df
+        return text_ser
 
-    def remove_extra_spaces(self, df, col):
-        df[col] = df[col].str.replace(r'\n', ' ')
-        df[col] = df[col].str.replace(r'\s+', ' ')
+    def remove_extra_spaces(self, text_ser):
+        text_ser = text_ser.str.replace(r'\n', ' ')
+        text_ser = text_ser.str.replace(r'\s+', ' ')
 
-        return df
+        return text_ser
 
     def get_text_expansion_rule(self):
         with open('models/pipeline/text_normalizer/text_expansion_rule.json', 'r') as f:
             expansion_rule = json.loads(f.read())
         return expansion_rule
 
-    def expand_abbreviation(self, df, col):
+    def expand_abbreviation(self, text_ser):
         expansion_rule = self.get_text_expansion_rule()
         c_re = re.compile('(%s)' % '|'.join(expansion_rule.keys()))
 
@@ -34,16 +34,16 @@ class TextNormalizer:
                 return expansion_rule[match.group(0)]
             return c_re.sub(replace, text)
 
-        df[col] = df[col].apply(expandContractions)
+        text_ser =text_ser.apply(expandContractions)
 
-        return df      
+        return text_ser      
 
-    def remove_non_english(self, df, col):
-        df[col] = df[col].str.replace(r'[^a-zA-Z]', ' ')
+    def remove_non_english(self, text_ser):
+        text_ser = text_ser.str.replace(r'[^a-zA-Z]', ' ')
 
-        return df    
+        return text_ser    
 
-    def normalize_text(self, df, col, stop_words_removal=True):
+    def normalize_text(self, text_ser, stop_words_removal=True):
             
         lemmatizer = WordNetLemmatizer()
 
@@ -66,15 +66,13 @@ class TextNormalizer:
         
         if stop_words_removal == True:
             stop_words = set(stopwords.words('english')) 
-            text_word_list = df[col].apply(lambda text: [word for word in word_tokenize(text) if not word in stop_words])
+            text_word_list = text_ser.apply(lambda text: [word for word in word_tokenize(text) if not word in stop_words])
         else:
-            text_word_list = df[col].apply(lambda text: [word for word in word_tokenize(text)])
+            text_word_list = text_ser.apply(lambda text: [word for word in word_tokenize(text)])
 
         text_word_list = [nltk.pos_tag(word_list) for word_list in text_word_list]
 
         for word_list in text_word_list:            
             normalized_text_list.append(' '.join([lemmatizer.lemmatize(word[0], get_wordnet_pos(word[1])) for word in word_list if get_JNVR(word[1])==True]))
-            
-        df[col] = normalized_text_list
-        
-        return df
+                    
+        return normalized_text_list
