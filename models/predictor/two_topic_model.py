@@ -290,7 +290,7 @@ class TwoTopicModel(BasePredictor):
         if self.prediction_label == 'desc_combined':
             prediction_df['desc_combined'] =  prediction_df["desc_total"] + " " + prediction_df["risk_desc"]
 
-        prediction_X = self.transform_vectorizer(prediction_df[self.prediction_label].tolist(), self.vectorizer_type)
+        prediction_X = self.transform_vectorizer(prediction_df[self.prediction_label].values.astype('U'))
         
         # Prediction
         prediction_Y_hat = self.predict_model(prediction_X)

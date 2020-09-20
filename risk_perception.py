@@ -28,9 +28,13 @@ class RiskPerception:
         self.user_type = self.config['user_type']
     
     def get_data(self):        
-        labeled_data_df = pd.read_csv(os.path.join(self.data_dir, self.labeled_data), engine='python', index_col=0)
-        labeled_data_df.columns = ['project_id','project_title','project_short_desc','project_url','risk_desc',
-                                    'perceived_risk', 'experience', 'age', 'gender', 'project_address'] 
+
+        if 'normalized_' not in self.labeled_data:
+            labeled_data_df = pd.read_csv(os.path.join(self.data_dir, self.labeled_data), engine='python', index_col=0)
+            labeled_data_df.columns = ['project_id','project_title','project_short_desc','project_url','risk_desc',
+                                        'perceived_risk', 'experience', 'age', 'gender', 'project_address'] 
+        else:
+            labeled_data_df = pd.read_csv(os.path.join(self.data_dir, self.labeled_data), encoding='utf-8', index_col=0)
 
         print("##### Training Data #####")
         print(labeled_data_df.head())
@@ -71,10 +75,8 @@ class RiskPerception:
 
         for col in cols:
             df[col] = df[col].apply(str)
-            print(df.head())
 
             print("## Normalizing Risk Description")
-
             text_normalizer = TextNormalizer()
 
             # Step 1. Standardize
